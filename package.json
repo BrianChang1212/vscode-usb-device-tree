@@ -1,0 +1,142 @@
+{
+  "name": "usb-device-tree",
+  "displayName": "USB Device Tree",
+  "description": "Browse Windows USB controllers, hubs, ports, and connected devices in VS Code.",
+  "icon": "resources/extension-icon.png",
+  "version": "0.11.1",
+  "publisher": "brian-chang",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BrianChang1212/vscode-usb-device-tree.git"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "extensionKind": [
+    "ui"
+  ],
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onView:usbDeviceTree.devices",
+    "onCommand:usbDeviceTree.refresh",
+    "onCommand:usbDeviceTree.search",
+    "onCommand:usbDeviceTree.exportSnapshot"
+  ],
+  "main": "./source/extension.js",
+  "files": [
+    "source/",
+    "resources/",
+    "docs/",
+    "native/bin/win32-x64/usb-topology.exe",
+    "README.md",
+    "CONTRIBUTING.md",
+    "SECURITY.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build:native": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File native/build.ps1",
+    "test": "node --test test/*.test.js",
+    "vscode:prepublish": "npm run build:native",
+    "package:verify": "node -e \"require('node:fs').mkdirSync('release', { recursive: true })\" && vsce package --allow-missing-repository --out release/usb-device-tree-0.11.1.vsix"
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "usbDeviceTree.refresh",
+        "title": "USB Device Tree: Refresh",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "usbDeviceTree.search",
+        "title": "USB Device Tree: Search",
+        "icon": "$(search)"
+      },
+      {
+        "command": "usbDeviceTree.exportSnapshot",
+        "title": "USB Device Tree: Export XML Snapshot",
+        "icon": "$(export)"
+      },
+      {
+        "command": "usbDeviceTree.pauseAutoRefresh",
+        "title": "USB Device Tree: Pause Auto Refresh",
+        "icon": "$(debug-pause)"
+      },
+      {
+        "command": "usbDeviceTree.resumeAutoRefresh",
+        "title": "USB Device Tree: Resume Auto Refresh",
+        "icon": "$(play)"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "usbDeviceTree",
+          "title": "USB Device Tree",
+          "icon": "resources/usb-device-tree.svg"
+        }
+      ]
+    },
+    "views": {
+      "usbDeviceTree": [
+        {
+          "id": "usbDeviceTree.devices",
+          "name": "USB Devices"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "usbDeviceTree.refresh",
+          "when": "view == usbDeviceTree.devices",
+          "group": "navigation"
+        },
+        {
+          "command": "usbDeviceTree.search",
+          "when": "view == usbDeviceTree.devices",
+          "group": "navigation"
+        },
+        {
+          "command": "usbDeviceTree.exportSnapshot",
+          "when": "view == usbDeviceTree.devices",
+          "group": "navigation"
+        },
+        {
+          "command": "usbDeviceTree.pauseAutoRefresh",
+          "when": "view == usbDeviceTree.devices && !usbDeviceTree.autoRefreshPaused",
+          "group": "navigation@1"
+        },
+        {
+          "command": "usbDeviceTree.resumeAutoRefresh",
+          "when": "view == usbDeviceTree.devices && usbDeviceTree.autoRefreshPaused",
+          "group": "navigation@1"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "USB Device Tree",
+      "properties": {
+        "usbDeviceTree.autoRefreshEnabled": {
+          "type": "boolean",
+          "default": true,
+          "scope": "application",
+          "description": "Automatically refresh the USB tree while its view is visible."
+        },
+        "usbDeviceTree.refreshIntervalSeconds": {
+          "type": "integer",
+          "default": 5,
+          "minimum": 2,
+          "maximum": 60,
+          "scope": "application",
+          "description": "Interval in seconds between automatic USB topology refreshes."
+        }
+      }
+    }
+  },
+  "devDependencies": {
+    "@vscode/vsce": "4.0.0"
+  }
+}

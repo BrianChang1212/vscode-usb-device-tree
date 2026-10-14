@@ -1,0 +1,33 @@
+name: Bug report
+description: Report a reproducible USB Device Tree issue
+title: "[Bug] "
+body:
+  - type: markdown
+    attributes:
+      value: Use synthetic data. Before attaching screenshots or logs, remove host names, device serial numbers, PnP instance IDs, device paths, and other private information.
+  - type: input
+    id: versions
+    attributes:
+      label: Environment versions
+      description: Provide the Windows, VS Code, and extension versions.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: List the steps that reproduce the issue.
+    validations:
+      required: true
+  - type: textarea
+    id: result
+    attributes:
+      label: Expected and actual results
+      description: Describe the expected behavior, actual behavior, and frequency.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: De-identified evidence
+      description: Attach a redacted error message or synthetic XML example. Report security vulnerabilities privately as described in SECURITY.md.
