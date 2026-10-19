@@ -46,6 +46,11 @@
   "contributes": {
     "commands": [
       {
+        "command": "usbDeviceTree.expandAll",
+        "title": "USB Device Tree: Expand All",
+        "icon": "$(chevron-down)"
+      },
+      {
         "command": "usbDeviceTree.refresh",
         "title": "USB Device Tree: Refresh",
         "icon": "$(refresh)"
