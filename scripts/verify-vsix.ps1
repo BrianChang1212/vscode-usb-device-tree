@@ -39,6 +39,13 @@ try {
   $archive.Dispose()
 }
 
-$hash = (Get-FileHash -LiteralPath $resolvedPath -Algorithm SHA256).Hash
+$algorithm = [System.Security.Cryptography.SHA256]::Create()
+$stream = [System.IO.File]::OpenRead($resolvedPath)
+try {
+  $hash = [System.BitConverter]::ToString($algorithm.ComputeHash($stream)).Replace('-', '')
+} finally {
+  $stream.Dispose()
+  $algorithm.Dispose()
+}
 Write-Output "Verified $($expected.publisher).$($expected.name) $($expected.version): $resolvedPath"
 Write-Output "SHA256 $hash"
