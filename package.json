@@ -3,7 +3,7 @@
   "displayName": "USB Device Tree",
   "description": "Browse Windows USB controllers, hubs, ports, and connected devices in VS Code.",
   "icon": "resources/extension-icon.png",
-  "version": "0.11.1",
+  "version": "0.12.0",
   "publisher": "brian-chang",
   "repository": {
     "type": "git",
@@ -41,7 +41,7 @@
     "build:native": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File native/build.ps1",
     "test": "node --test test/*.test.js",
     "vscode:prepublish": "npm run build:native",
-    "package:verify": "node -e \"require('node:fs').mkdirSync('release', { recursive: true })\" && vsce package --allow-missing-repository --out release/usb-device-tree-0.11.1.vsix"
+    "package:verify": "node -e \"require('node:fs').mkdirSync('release', { recursive: true })\" && vsce package --allow-missing-repository --out release/usb-device-tree.vsix && powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/verify-vsix.ps1 release/usb-device-tree.vsix"
   },
   "contributes": {
     "commands": [

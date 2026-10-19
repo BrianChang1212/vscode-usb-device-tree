@@ -18,6 +18,8 @@ npm.cmd run package:verify
 
 The native build output is `native/bin/win32-x64/usb-topology.exe`, which is required in the VSIX. Do not commit generated `.obj`, `.pdb`, or `.vsix` files. VSIX packaging runs `vscode:prepublish` to build the helper first. Automated tests cover synthetic topologies, limits, error handling, and XML escaping. They do not replace verification of real Windows controller and hub topologies.
 
+GitHub CI runs these checks on push and pull requests and saves the verified VSIX as a workflow artifact. To prepare a downloadable VSIX on demand, run the `Prepare VSIX` workflow from the Actions tab. Its artifact is a reviewable package, not a Marketplace publication. Before uploading it, check the workflow commit and SHA-256, install the VSIX, and confirm the Marketplace publisher, version, and listing after upload.
+
 ## Native enumerator
 
 - Read data only through public Windows device interfaces and USB IOCTLs.

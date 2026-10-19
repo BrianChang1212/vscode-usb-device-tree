@@ -29,3 +29,9 @@ jobs:
             node --check $_.FullName
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           }
+      - name: Save verified VSIX
+        uses: actions/upload-artifact@v4
+        with:
+          name: vsix-${{ github.sha }}
+          path: release/usb-device-tree.vsix
+          if-no-files-found: error

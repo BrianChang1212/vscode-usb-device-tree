@@ -1,0 +1,43 @@
+name: Prepare VSIX
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install dependencies
+        run: npm.cmd ci
+      - name: Build Windows x64 USB topology helper
+        run: npm.cmd run build:native
+      - name: Run tests
+        run: npm.cmd test
+      - name: Package and verify VSIX
+        run: npm.cmd run package:verify
+      - name: Check source syntax
+        shell: pwsh
+        run: |
+          Get-ChildItem -Path source -Filter *.js | ForEach-Object {
+            node --check $_.FullName
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+      - name: Record SHA-256
+        shell: pwsh
+        run: |
+          $hash = (Get-FileHash -LiteralPath release/usb-device-tree.vsix -Algorithm SHA256).Hash
+          "usb-device-tree.vsix SHA256 $hash" | Add-Content -Path $env:GITHUB_STEP_SUMMARY
+      - name: Save verified VSIX
+        uses: actions/upload-artifact@v4
+        with:
+          name: vsix-${{ github.sha }}
+          path: release/usb-device-tree.vsix
+          if-no-files-found: error

@@ -1,6 +1,6 @@
 # Changelog
 
-## 2026-10-19 — Feature — Expand visible USB tree
+## 2026-10-19 — 0.12.0 — Feature — Expand visible USB tree
 
 - Added an **Expand All** action to the USB Devices view title. It expands the currently visible branches, including filtered search results.
 
