@@ -16,6 +16,7 @@ The bundled native helper queries the topology through Windows USB device interf
 - Lists USB4 host routers and their present PnP children separately from USB 3.x controller and hub ports.
 - Finds `COM*` serial ports within each USB device's PnP subtree. Port and device labels, serial-port child nodes, and details show the port number, friendly name, source instance ID, and service name.
 - Supports search, manual refresh, automatic refresh while the view is visible, and pause/resume controls. USB device-interface changes trigger an earlier refresh; polling every five seconds remains as a fallback. After a successful query, a connected physical port briefly turns green and a disconnected one briefly turns red, then returns to the theme color after about 1.8 seconds. The initial scan and failed queries do not show connection-change colors.
+- Expands every visible branch from the USB Devices view title. While search is active, only the filtered results are expanded.
 - Exports the project's `<UsbDeviceTreeSnapshot version="1">` XML format.
 - Limits query time, output size, node count, and tree depth.
 
@@ -31,7 +32,8 @@ The bundled native helper queries the topology through Windows USB device interf
 1. Install the VSIX and open **USB Device Tree** in the VS Code Activity Bar on Windows x64.
 2. Click Refresh or wait for automatic refresh while the view is visible.
 3. Select a node to inspect the available details, or use Search to locate a device or port.
-4. Run **USB Device Tree: Export XML Snapshot** to save the most recent successful snapshot.
+4. Click **Expand All** in the USB Devices view title to expand the visible tree; use the view's Collapse All control to close it again.
+5. Run **USB Device Tree: Export XML Snapshot** to save the most recent successful snapshot.
 
 After a failed refresh, the view marks the retained data as stale. XML export is unavailable until a query has succeeded.
 

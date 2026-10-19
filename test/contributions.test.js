@@ -31,6 +31,19 @@ test('USB Devices is contributed under its own Activity Bar container', () => {
   assert.ok(titleMenu.find((item) => item.command === 'usbDeviceTree.resumeAutoRefresh').when.includes('usbDeviceTree.autoRefreshPaused'));
 });
 
+test('exposes Expand All in the USB view title without adding a command-palette entry', () => {
+  const commandId = 'usbDeviceTree.expandAll';
+  const command = manifest.contributes.commands.find((entry) => entry.command === commandId);
+  const titleAction = manifest.contributes.menus['view/title'].find((entry) => entry.command === commandId);
+  const paletteAction = manifest.contributes.menus.commandPalette.find((entry) => entry.command === commandId);
+
+  assert.equal(command.title, 'USB Device Tree: Expand All');
+  assert.equal(command.icon, '$(chevron-down)');
+  assert.equal(titleAction.when, 'view == usbDeviceTree.devices');
+  assert.equal(paletteAction.when, 'false');
+  assert.ok(manifest.activationEvents.includes('onCommand:usbDeviceTree.expandAll'));
+});
+
 test('packages a self-contained Windows x64 helper without an external executable setting', () => {
   const commands = manifest.contributes.commands.map(({ command }) => command);
   assert.equal(commands.includes('usbDeviceTree.selectExecutable'), false);

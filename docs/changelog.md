@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-19 — Feature — Expand visible USB tree
+
+- Added an **Expand All** action to the USB Devices view title. It expands the currently visible branches, including filtered search results.
+
 ## 2026-10-14 — 0.11.1 — Fix — English interface text
 
 - Translated Details headings, field labels, status values, and related tree and command messages into English.

@@ -21,6 +21,7 @@
   ],
   "activationEvents": [
     "onView:usbDeviceTree.devices",
+    "onCommand:usbDeviceTree.expandAll",
     "onCommand:usbDeviceTree.refresh",
     "onCommand:usbDeviceTree.search",
     "onCommand:usbDeviceTree.exportSnapshot"
@@ -90,6 +91,11 @@
     "menus": {
       "view/title": [
         {
+          "command": "usbDeviceTree.expandAll",
+          "when": "view == usbDeviceTree.devices",
+          "group": "navigation"
+        },
+        {
           "command": "usbDeviceTree.refresh",
           "when": "view == usbDeviceTree.devices",
           "group": "navigation"
@@ -113,6 +119,12 @@
           "command": "usbDeviceTree.resumeAutoRefresh",
           "when": "view == usbDeviceTree.devices && usbDeviceTree.autoRefreshPaused",
           "group": "navigation@1"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "usbDeviceTree.expandAll",
+          "when": "false"
         }
       ]
     },

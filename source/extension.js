@@ -5,6 +5,7 @@ const { AutoRefreshScheduler } = require('./auto-refresh');
 const { createAutoRefreshPauseState } = require('./auto-refresh-pause');
 const { DetailsPanel } = require('./detail');
 const { TransientHighlights } = require('./device-changes');
+const { expandVisibleTree } = require('./expand-tree');
 const { DeviceChangeWatcher } = require('./device-watch');
 const { queryUsbTopology } = require('./native');
 const { isAutomaticRefresh, nodeDescription, viewStatus } = require('./refresh-status');
@@ -157,6 +158,9 @@ function activate(context) {
   }, undefined, context.subscriptions);
 
   context.subscriptions.push(
+    vscode.commands.registerCommand('usbDeviceTree.expandAll', async () => {
+      await expandVisibleTree(treeView, provider.nodes);
+    }),
     vscode.commands.registerCommand('usbDeviceTree.refresh', async (options = {}) => {
       if (refreshing) return;
       const automatic = isAutomaticRefresh(options);
