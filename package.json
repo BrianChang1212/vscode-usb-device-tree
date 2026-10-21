@@ -3,7 +3,7 @@
   "displayName": "USB Device Tree",
   "description": "Browse Windows USB controllers, hubs, ports, and connected devices in VS Code.",
   "icon": "resources/extension-icon.png",
-  "version": "0.12.0",
+  "version": "0.13.0",
   "publisher": "brian-chang",
   "repository": {
     "type": "git",
@@ -89,7 +89,8 @@
       "usbDeviceTree": [
         {
           "id": "usbDeviceTree.devices",
-          "name": "USB Devices"
+          "name": "USB Devices",
+          "type": "webview"
         }
       ]
     },

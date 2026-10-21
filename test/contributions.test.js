@@ -17,7 +17,7 @@ test('USB Devices is contributed under its own Activity Bar container', () => {
   assert.ok(fs.existsSync(path.join(root, container.icon)), 'container icon is missing');
 
   const views = manifest.contributes.views.usbDeviceTree;
-  assert.ok(views.some((view) => view.id === 'usbDeviceTree.devices'));
+  assert.ok(views.some((view) => view.id === 'usbDeviceTree.devices' && view.type === 'webview'));
   assert.equal(manifest.contributes.views.explorer, undefined);
   assert.ok(manifest.activationEvents.includes('onView:usbDeviceTree.devices'));
   assert.ok(manifest.files.includes('resources/'));

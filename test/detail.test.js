@@ -3,6 +3,26 @@ const test = require('node:test');
 
 const { renderDetailHtml } = require('../source/detail');
 
+test('renders a fixed dark device summary and accessible detail tabs', () => {
+  const html = renderDetailHtml({ label: 'Port 5: Radio', port: 5, status: 'connected',
+    vendorId: 0x0489, productId: 0xe122, speed: 'full', deviceClass: 0xe0,
+    detailSections: [
+      { title: 'Physical Port', text: 'Status: connected\nPort: 5' },
+      { title: 'USB Device', text: 'Speed: full\nVendor ID: 0x0489\nPnP driverInf: oem42.inf\nDevice descriptor bytes: 1201' },
+    ] });
+  assert.match(html, /class="device-hero"/);
+  assert.match(html, /VID 0489/);
+  assert.match(html, /USB SPEED/);
+  assert.match(html, /Full Speed/);
+  assert.match(html, /DEVICE CLASS/);
+  assert.match(html, /class="detail-tabs" role="group"/);
+  assert.match(html, /Physical Port/);
+  assert.match(html, /USB Device/);
+  assert.match(html, /Windows PnP/);
+  assert.match(html, /Raw Data/);
+  assert.match(html, /--surface: #0b0e0c/);
+});
+
 test('renders node labels and device details as escaped, script-free HTML', () => {
   const html = renderDetailHtml({
     label: '<img src=x onerror=alert(1)>',

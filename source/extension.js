@@ -5,12 +5,12 @@ const { AutoRefreshScheduler } = require('./auto-refresh');
 const { createAutoRefreshPauseState } = require('./auto-refresh-pause');
 const { DetailsPanel } = require('./detail');
 const { TransientHighlights } = require('./device-changes');
-const { expandVisibleTree } = require('./expand-tree');
 const { DeviceChangeWatcher } = require('./device-watch');
 const { queryUsbTopology } = require('./native');
-const { isAutomaticRefresh, nodeDescription, viewStatus } = require('./refresh-status');
+const { isAutomaticRefresh, viewStatus } = require('./refresh-status');
 const { createSnapshot, exportSnapshot } = require('./snapshot');
 const { filterTreeNodes, toTreeNodes } = require('./tree');
+const { UsbTreeWebview } = require('./webview-tree');
 
 class UsbDeviceTreeProvider {
   constructor(highlights) {
@@ -24,36 +24,6 @@ class UsbDeviceTreeProvider {
     this.searchQuery = '';
     this.onDidChangeTreeDataEmitter = new vscode.EventEmitter();
     this.onDidChangeTreeData = this.onDidChangeTreeDataEmitter.event;
-  }
-
-  getTreeItem(node) {
-    const collapsibleState = node.children.length
-      ? (this.searchQuery.trim()
-        ? vscode.TreeItemCollapsibleState.Expanded
-        : vscode.TreeItemCollapsibleState.Collapsed)
-      : vscode.TreeItemCollapsibleState.None;
-    const item = new vscode.TreeItem(node.label, collapsibleState);
-    item.id = node.id;
-    item.resourceUri = vscode.Uri.from({ scheme: 'usb-device-tree', path: `/${node.id}` });
-    const change = this.highlights?.get(node.id);
-    if (change) {
-      const color = new vscode.ThemeColor(change === 'connected'
-        ? 'gitDecoration.addedResourceForeground' : 'gitDecoration.deletedResourceForeground');
-      item.iconPath = new vscode.ThemeIcon('circle-filled', color);
-    }
-    item.contextValue = 'usbDeviceTree.node';
-    item.description = nodeDescription(node, this.stale);
-    item.tooltip = node.detailText;
-    item.children = node.children;
-    return item;
-  }
-
-  getChildren(node) {
-    return node ? node.children : this.nodes;
-  }
-
-  getParent(node) {
-    return node.parentId ? this.nodesById.get(node.parentId) : undefined;
   }
 
   setTopology(topology) {
@@ -107,30 +77,16 @@ function friendlyError(error) {
 }
 
 function activate(context) {
-  const decorationChanges = new vscode.EventEmitter();
-  const highlights = new TransientHighlights((ids) => {
-    decorationChanges.fire(ids.map((id) => vscode.Uri.from({ scheme: 'usb-device-tree', path: `/${id}` })));
+  const highlights = new TransientHighlights(() => {
     provider.onDidChangeTreeDataEmitter.fire(undefined);
   });
   const provider = new UsbDeviceTreeProvider(highlights);
-  const decorationProvider = {
-    onDidChangeFileDecorations: decorationChanges.event,
-    provideFileDecoration(uri) {
-      if (uri.scheme !== 'usb-device-tree') return undefined;
-      const change = highlights.get(uri.path.slice(1));
-      if (!change) return undefined;
-      const color = new vscode.ThemeColor(change === 'connected'
-        ? 'gitDecoration.addedResourceForeground' : 'gitDecoration.deletedResourceForeground');
-      const decoration = new vscode.FileDecoration(undefined,
-        change === 'connected' ? 'Just connected' : 'Just disconnected', color);
-      decoration.propagate = false;
-      return decoration;
-    },
-  };
   const detailsPanel = new DetailsPanel(vscode, context.subscriptions);
-  const treeView = vscode.window.createTreeView('usbDeviceTree.devices', {
-    treeDataProvider: provider,
-    showCollapseAll: true,
+  const treeView = new UsbTreeWebview(vscode, context.extensionUri, provider, highlights, (action) => {
+    const command = action === 'expand' ? 'expandAll' : action === 'pause'
+      ? (pauseState.paused ? 'resumeAutoRefresh' : 'pauseAutoRefresh')
+      : action === 'export' ? 'exportSnapshot' : action;
+    void vscode.commands.executeCommand(`usbDeviceTree.${command}`);
   });
   const autoRefresh = new AutoRefreshScheduler(
     () => vscode.commands.executeCommand('usbDeviceTree.refresh', { automatic: true }),
@@ -143,9 +99,10 @@ function activate(context) {
   let refreshing = false;
 
   context.subscriptions.push({ dispose: () => autoRefresh.stop() }, watcher,
-    { dispose: () => highlights.dispose() }, decorationChanges,
-    vscode.window.registerFileDecorationProvider(decorationProvider),
-    treeView, provider.onDidChangeTreeDataEmitter);
+    { dispose: () => highlights.dispose() },
+    vscode.window.registerWebviewViewProvider('usbDeviceTree.devices', treeView),
+    treeView, provider.onDidChangeTreeDataEmitter,
+    provider.onDidChangeTreeData(() => updateMessage()));
 
   treeView.onDidChangeVisibility(({ visible }) => {
     if (visible && isAutoRefreshEnabled()) {
@@ -159,7 +116,7 @@ function activate(context) {
 
   context.subscriptions.push(
     vscode.commands.registerCommand('usbDeviceTree.expandAll', async () => {
-      await expandVisibleTree(treeView, provider.nodes);
+      treeView.expandAll();
     }),
     vscode.commands.registerCommand('usbDeviceTree.refresh', async (options = {}) => {
       if (refreshing) return;
@@ -206,10 +163,6 @@ function activate(context) {
       if (query === undefined) return;
       provider.setSearchQuery(query);
       updateMessage();
-      if (query.trim()) {
-        const target = firstLeaf(provider.nodes[0]);
-        if (target) await treeView.reveal(target, { expand: true, focus: false, select: false });
-      }
     }),
     vscode.commands.registerCommand('usbDeviceTree.exportSnapshot', async () => {
       if (!lastSuccessfulSnapshot) {
@@ -230,6 +183,7 @@ function activate(context) {
       || event.affectsConfiguration('usbDeviceTree.refreshIntervalSeconds')) syncAutoRefresh();
   });
   context.subscriptions.push(configSubscription);
+  syncAutoRefresh();
 
   function isAutoRefreshEnabled() {
     return vscode.workspace.getConfiguration('usbDeviceTree').get('autoRefreshEnabled', true)
@@ -246,6 +200,8 @@ function activate(context) {
       watcher.stop();
     }
     void vscode.commands.executeCommand('setContext', 'usbDeviceTree.autoRefreshPaused', pauseState.paused);
+    treeView.paused = pauseState.paused;
+    treeView.running = autoRefresh.running;
     updateMessage();
   }
 
@@ -260,11 +216,7 @@ function activate(context) {
       visible: treeView.visible,
       enabled: isAutoRefreshEnabled(),
     });
-  }
-
-  function firstLeaf(node) {
-    if (!node) return undefined;
-    return node.children.length ? firstLeaf(node.children[0]) : node;
+    treeView.update();
   }
 }
 

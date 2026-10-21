@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-21 — 0.13.0 — UI — Dark USB workbench
+
+- Redesigned the USB topology sidebar as a compact dark workbench with controller, hub, and port rows, search, and expand/collapse controls.
+- Redesigned device details with a summary and Physical Port, USB Device, Windows PnP, and Raw Data tabs.
+- Preserved refresh, pause/resume, connection-change highlights, selection, and XML export in the new layout.
+
 ## 2026-10-19 — 0.12.0 — Feature — Expand visible USB tree
 
 - Added an **Expand All** action to the USB Devices view title. It expands the currently visible branches, including filtered search results.

@@ -103,18 +103,48 @@ function renderSection(section) {
   const main = groups.basic.length ? renderRows(groups.basic) : '';
   const descriptors = groups.descriptors.length
     ? `<div class="subsection"><h3>Descriptors and Configurations</h3>${renderRows(groups.descriptors)}</div>` : '';
-  const pnp = groups.pnp.length
-    ? `<div class="subsection"><h3>Windows PnP and COM</h3>${renderRows(groups.pnp)}</div>` : '';
-  const raw = groups.raw.length
-    ? `<details class="raw"><summary>Raw Data</summary>${renderRows(groups.raw)}</details>` : '';
-  return `<section class="device-section"><h2>${escapeHtml(section.title)}</h2>${main}${descriptors}${pnp}${raw}</section>`;
+  return `<section class="device-section"><h2>${escapeHtml(section.title)}</h2>${main}${descriptors}</section>`;
+}
+
+function renderTabSections(sections, kind) {
+  if (kind === 'pnp' || kind === 'raw') {
+    const rows = sections.flatMap((section) => detailGroups(section.text)[kind]);
+    return rows.length ? `<section class="device-section"><h2>${kind === 'pnp' ? 'Windows PnP and COM' : 'Raw Data'}</h2>${renderRows(rows)}</section>`
+      : '<p class="empty">No data is available in this category.</p>';
+  }
+  const selected = sections.filter((section) =>
+    (section.title.toLowerCase().includes('physical port') ? 'port' : 'device') === kind);
+  return selected.length ? selected.map(renderSection).join('\n')
+    : '<p class="empty">No data is available in this category.</p>';
+}
+
+function deviceSummary(node) {
+  const label = escapeHtml(node.label || 'USB Device');
+  const status = String(node.status || 'unknown').toUpperCase();
+  const vid = Number.isInteger(node.vendorId) ? node.vendorId.toString(16).padStart(4, '0') : '----';
+  const pid = Number.isInteger(node.productId) ? node.productId.toString(16).padStart(4, '0') : '----';
+  const port = Number.isInteger(node.port) ? `PORT ${String(node.port).padStart(2, '0')}` : 'USB DEVICE';
+  const speeds = { low: 'Low Speed', full: 'Full Speed', high: 'High Speed',
+    super: 'SuperSpeed', superPlus: 'SuperSpeedPlus' };
+  const facts = [];
+  if (node.speed) facts.push(['USB SPEED', speeds[node.speed] || node.speed]);
+  if (Number.isInteger(node.deviceClass)) {
+    const classLine = String(node.detailText || '').match(/^Class: (.+)$/m);
+    facts.push(['DEVICE CLASS', classLine ? classLine[1] : `0x${node.deviceClass.toString(16).padStart(2, '0')}`]);
+  }
+  const metrics = facts.length ? `<div class="hero-facts">${facts.map(([name, value]) =>
+    `<div class="fact"><span>${name}</span><strong>${escapeHtml(value)}</strong></div>`).join('')}</div>` : '';
+  return `<header class="device-hero"><div class="eyebrow"><span>${port}</span><span class="state ${escapeHtml(status.toLowerCase())}"><i></i>${escapeHtml(status)}</span></div><h1>${label}</h1><div class="hero-meta"><span>VID ${vid}</span><span>PID ${pid}</span></div>${metrics}</header>`;
 }
 
 function renderDetailHtml(node) {
-  const label = escapeHtml(node.label || 'USB Device');
   const sections = Array.isArray(node.detailSections) && node.detailSections.length
     ? node.detailSections : node.detailText ? [{ title: 'Details', text: node.detailText }] : [];
-  const body = sections.length ? sections.map(renderSection).join('\n')
+  const hasPort = sections.some((section) => section.title.toLowerCase().includes('physical port'));
+  const tabs = [['port', 'Physical Port'], ['device', 'USB Device'], ['pnp', 'Windows PnP'], ['raw', 'Raw Data']];
+  const body = sections.length ? `<div class="detail-tabs" role="group" aria-label="Detail category">${tabs.map(([id, title]) =>
+    `<input type="radio" id="tab-${id}" name="detail-category" ${id === (hasPort ? 'port' : 'device') ? 'checked' : ''}><label for="tab-${id}">${title}</label>`).join('')}</div>${tabs.map(([id]) =>
+      `<div class="tab-panel" id="panel-${id}">${renderTabSections(sections, id)}</div>`).join('')}`
     : '<p class="empty">No details are available for this node.</p>';
 
   return `<!doctype html>
@@ -123,28 +153,49 @@ function renderDetailHtml(node) {
   <meta charset="utf-8">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline';">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>${label}</title>
+  <title>${escapeHtml(node.label || 'USB Device')}</title>
   <style>
-    body { color: var(--vscode-foreground); background: var(--vscode-editor-background); font-family: var(--vscode-font-family); margin: 0; padding: 24px clamp(16px, 4vw, 42px) 48px; font-size: 14px; line-height: 1.5; }
-    main { max-width: 980px; margin: 0 auto; }
-    h1 { font-size: 1.35rem; font-weight: 650; line-height: 1.35; margin: 0 0 24px; }
-    h2 { font-size: 1.05rem; margin: 0 0 14px; }
-    h3 { font-size: .9rem; font-weight: 600; margin: 0 0 10px; }
-    .device-section { border-top: 1px solid var(--vscode-panel-border); padding: 22px 0 26px; }
+    :root { color-scheme: dark; --surface: #0b0e0c; --panel: #151a16; --line: #2b342c; --muted: #9ba99d; --text: #f0f5ef; --accent: #91e545; }
+    * { box-sizing: border-box; }
+    body { color: var(--text); background: var(--surface); font-family: 'Segoe UI', var(--vscode-font-family, sans-serif); margin: 0; font-size: 14px; line-height: 1.5; }
+    main { max-width: 1120px; margin: 0 auto; padding: 26px clamp(16px, 4vw, 44px) 56px; }
+    .device-hero { background: linear-gradient(115deg, #202a1b, #141b15 65%, #111511); border: 1px solid #3b4d32; border-left: 4px solid var(--accent); padding: 22px 26px; margin-bottom: 20px; }
+    .eyebrow, .hero-meta { display: flex; flex-wrap: wrap; gap: 10px 20px; color: var(--muted); font: 700 11px/1.3 Consolas, monospace; letter-spacing: .12em; }
+    .hero-facts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+    .fact { min-width: 140px; flex: 1; background: #111810; border: 1px solid #354431; padding: 11px 13px; }
+    .fact span { display: block; color: var(--muted); font: 700 10px Consolas, monospace; letter-spacing: .1em; }
+    .fact strong { display: block; color: var(--text); font-size: 13px; margin-top: 5px; overflow-wrap: anywhere; }
+    .eyebrow { justify-content: space-between; }
+    .state { color: var(--accent); display: inline-flex; align-items: center; gap: 7px; }
+    .state:not(.connected) { color: #b2bbb2; }
+    .state i { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+    h1 { font-size: clamp(20px, 3vw, 31px); font-weight: 650; line-height: 1.25; margin: 16px 0; overflow-wrap: anywhere; }
+    h2 { color: var(--accent); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; margin: 0 0 20px; }
+    h3 { font-size: 12px; font-weight: 650; margin: 20px 0 10px; }
+    .detail-tabs { display: flex; gap: 4px; overflow-x: auto; border-bottom: 1px solid var(--line); }
+    .detail-tabs input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+    .detail-tabs label { white-space: nowrap; color: var(--muted); padding: 12px 15px; cursor: pointer; font-size: 12px; font-weight: 650; }
+    .detail-tabs label:hover { color: var(--text); }
+    .detail-tabs input:checked + label { color: var(--accent); border-bottom: 2px solid var(--accent); }
+    .detail-tabs input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: -3px; }
+    .tab-panel { display: none; }
+    main:has(#tab-port:checked) #panel-port, main:has(#tab-device:checked) #panel-device, main:has(#tab-pnp:checked) #panel-pnp, main:has(#tab-raw:checked) #panel-raw { display: block; }
+    .device-section { background: var(--panel); border: 1px solid var(--line); padding: 24px; margin-top: 20px; }
     .subsection { margin-top: 22px; }
     .fields { margin: 0; }
-    .field { display: grid; grid-template-columns: minmax(165px, 32%) minmax(0, 1fr); gap: 10px 18px; padding: 7px 0; border-bottom: 1px solid var(--vscode-panel-border); }
-    dt { color: var(--vscode-descriptionForeground); }
-    dd { margin: 0; overflow-wrap: anywhere; font-family: var(--vscode-editor-font-family); font-size: 13px; }
+    .field { display: grid; grid-template-columns: minmax(165px, 32%) minmax(0, 1fr); gap: 10px 18px; padding: 9px 0; border-bottom: 1px solid var(--line); }
+    .field:last-child { border-bottom: 0; }
+    dt { color: var(--muted); }
+    dd { margin: 0; overflow-wrap: anywhere; font-family: Consolas, var(--vscode-editor-font-family, monospace); font-size: 13px; }
     .raw { margin-top: 20px; }
-    summary { color: var(--vscode-textLink-foreground); cursor: pointer; padding: 8px 0; }
-    summary:focus-visible { outline: 1px solid var(--vscode-focusBorder); }
-    .empty { color: var(--vscode-descriptionForeground); }
-    @media (max-width: 550px) { .field { grid-template-columns: 1fr; gap: 2px; } }
+    summary { color: var(--accent); cursor: pointer; padding: 8px 0; }
+    summary:focus-visible { outline: 2px solid var(--accent); }
+    .empty { color: var(--muted); padding: 24px 0; }
+    @media (max-width: 550px) { .field { grid-template-columns: 1fr; gap: 2px; } .device-hero, .device-section { padding: 18px; } }
   </style>
 </head>
 <body>
-  <main><h1>${label}</h1>${body}</main>
+  <main>${deviceSummary(node)}${body}</main>
 </body>
 </html>`;
 }
