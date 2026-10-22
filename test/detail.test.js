@@ -20,7 +20,7 @@ test('renders a fixed dark device summary and accessible detail tabs', () => {
   assert.match(html, /USB Device/);
   assert.match(html, /Windows PnP/);
   assert.match(html, /Raw Data/);
-  assert.match(html, /--surface: #0b0e0c/);
+  assert.match(html, /--surface: #080d0a/);
 });
 
 test('renders node labels and device details as escaped, script-free HTML', () => {

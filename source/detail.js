@@ -155,32 +155,32 @@ function renderDetailHtml(node) {
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>${escapeHtml(node.label || 'USB Device')}</title>
   <style>
-    :root { color-scheme: dark; --surface: #0b0e0c; --panel: #151a16; --line: #2b342c; --muted: #9ba99d; --text: #f0f5ef; --accent: #91e545; }
+    :root { color-scheme: dark; --surface: #080d0a; --panel: #111b14; --raised: #1b2a20; --line: #31513a; --muted: #a4c3aa; --text: #e5f5e8; --accent: #89e829; }
     * { box-sizing: border-box; }
-    body { color: var(--text); background: var(--surface); font-family: 'Segoe UI', var(--vscode-font-family, sans-serif); margin: 0; font-size: 14px; line-height: 1.5; }
+    body { color: var(--text); background: radial-gradient(ellipse at 95% 0%, #16402344, transparent 37%), var(--surface); font-family: var(--vscode-font-family, 'Segoe UI', sans-serif); margin: 0; font-size: 14px; line-height: 1.65; }
     main { max-width: 1120px; margin: 0 auto; padding: 26px clamp(16px, 4vw, 44px) 56px; }
-    .device-hero { background: linear-gradient(115deg, #202a1b, #141b15 65%, #111511); border: 1px solid #3b4d32; border-left: 4px solid var(--accent); padding: 22px 26px; margin-bottom: 20px; }
+    .device-hero { background: linear-gradient(145deg, #16251aee, #0e1812f2); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 6px; padding: 22px 26px; margin-bottom: 20px; box-shadow: inset 0 1px #b4ff7f14, 0 10px 24px #0004; }
     .eyebrow, .hero-meta { display: flex; flex-wrap: wrap; gap: 10px 20px; color: var(--muted); font: 700 11px/1.3 Consolas, monospace; letter-spacing: .12em; }
     .hero-facts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
-    .fact { min-width: 140px; flex: 1; background: #111810; border: 1px solid #354431; padding: 11px 13px; }
+    .fact { min-width: 140px; flex: 1; background: var(--panel); border: 1px solid var(--line); border-radius: 5px; padding: 11px 13px; }
     .fact span { display: block; color: var(--muted); font: 700 10px Consolas, monospace; letter-spacing: .1em; }
     .fact strong { display: block; color: var(--text); font-size: 13px; margin-top: 5px; overflow-wrap: anywhere; }
     .eyebrow { justify-content: space-between; }
     .state { color: var(--accent); display: inline-flex; align-items: center; gap: 7px; }
     .state:not(.connected) { color: #b2bbb2; }
     .state i { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
-    h1 { font-size: clamp(20px, 3vw, 31px); font-weight: 650; line-height: 1.25; margin: 16px 0; overflow-wrap: anywhere; }
+    h1 { font-family: Consolas, 'Cascadia Code', monospace; font-size: clamp(20px, 3vw, 31px); font-weight: 700; line-height: 1.25; margin: 16px 0; overflow-wrap: anywhere; }
     h2 { color: var(--accent); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; margin: 0 0 20px; }
     h3 { font-size: 12px; font-weight: 650; margin: 20px 0 10px; }
     .detail-tabs { display: flex; gap: 4px; overflow-x: auto; border-bottom: 1px solid var(--line); }
     .detail-tabs input { position: absolute; opacity: 0; width: 1px; height: 1px; }
-    .detail-tabs label { white-space: nowrap; color: var(--muted); padding: 12px 15px; cursor: pointer; font-size: 12px; font-weight: 650; }
+    .detail-tabs label { white-space: nowrap; color: var(--muted); background: var(--raised); border: 1px solid var(--line); border-radius: 4px 4px 0 0; padding: 10px 14px; cursor: pointer; font-size: 12px; font-weight: 650; }
     .detail-tabs label:hover { color: var(--text); }
-    .detail-tabs input:checked + label { color: var(--accent); border-bottom: 2px solid var(--accent); }
+    .detail-tabs input:checked + label { color: var(--surface); background: var(--accent); border-color: var(--accent); font-weight: 700; }
     .detail-tabs input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: -3px; }
     .tab-panel { display: none; }
     main:has(#tab-port:checked) #panel-port, main:has(#tab-device:checked) #panel-device, main:has(#tab-pnp:checked) #panel-pnp, main:has(#tab-raw:checked) #panel-raw { display: block; }
-    .device-section { background: var(--panel); border: 1px solid var(--line); padding: 24px; margin-top: 20px; }
+    .device-section { background: linear-gradient(145deg, #16251aee, #0e1812f2); border: 1px solid var(--line); border-radius: 6px; padding: 24px; margin-top: 20px; box-shadow: inset 0 1px #b4ff7f14, 0 10px 24px #0004; }
     .subsection { margin-top: 22px; }
     .fields { margin: 0; }
     .field { display: grid; grid-template-columns: minmax(165px, 32%) minmax(0, 1fr); gap: 10px 18px; padding: 9px 0; border-bottom: 1px solid var(--line); }
