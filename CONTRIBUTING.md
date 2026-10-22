@@ -18,7 +18,9 @@ npm.cmd run package:verify
 
 The native build output is `native/bin/win32-x64/usb-topology.exe`, which is required in the VSIX. Do not commit generated `.obj`, `.pdb`, or `.vsix` files. VSIX packaging runs `vscode:prepublish` to build the helper first. Automated tests cover synthetic topologies, limits, error handling, and XML escaping. They do not replace verification of real Windows controller and hub topologies.
 
-GitHub CI runs these checks on push and pull requests and saves the verified VSIX as a workflow artifact. To prepare a downloadable VSIX on demand, run the `Prepare VSIX` workflow from the Actions tab. Its artifact is a reviewable package, not a Marketplace publication. Before uploading it, check the workflow commit and SHA-256, install the VSIX, and confirm the Marketplace publisher, version, and listing after upload.
+GitHub CI runs these checks on push and pull requests and saves the verified VSIX as a workflow artifact. Run the `Package and Publish VSIX` workflow from the Actions tab on `main` to prepare a downloadable VSIX without publishing it. Before distributing the artifact, check the workflow commit and SHA-256 and install the VSIX in a normal VS Code window.
+
+To publish automatically, first configure a Marketplace trusted publishing policy for publisher `brian-chang`, GitHub repository `BrianChang1212/vscode-usb-device-tree`, and workflow file `release.yml` (`.github/workflows/release.yml` in the repository). Then push a `v<package.json version>` tag on the release commit, such as `v0.13.0`. The tagged workflow checks the tag against `package.json`, runs tests, builds and verifies the VSIX, publishes that exact VSIX with GitHub OIDC, and checks the Marketplace version and VSIX SHA-256. A failed publish or readback fails the workflow. Check the Marketplace listing and install the published version in VS Code after the workflow succeeds. Each Marketplace update needs a new package version and matching tag.
 
 ## Native enumerator
 
