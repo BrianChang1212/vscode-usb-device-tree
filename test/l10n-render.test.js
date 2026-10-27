@@ -81,8 +81,10 @@ test('tree labels and metadata translate while USB-sourced names and VID/PID sta
 });
 
 test('sidebar CSS is the guide CSS plus tree components with readable connection state colors', () => {
-  const css = fs.readFileSync(path.join(root, 'resources', 'tree.css'), 'utf8');
-  assert.ok(css.startsWith(guideCss('sideBar').trimStart()), 'tree.css must start with guideCss("sideBar")');
+  // Windows CI checks out with CRLF (core.autocrlf); compare line content, not line endings.
+  const lf = text => text.replace(/\r\n/g, '\n');
+  const css = lf(fs.readFileSync(path.join(root, 'resources', 'tree.css'), 'utf8'));
+  assert.ok(css.startsWith(lf(guideCss('sideBar')).trimStart()), 'tree.css must start with guideCss("sideBar")');
   assertGuideCss(css, 'sideBar');
   assertStateColors(css, [['.connected .node-glyph', '--accent'], ['.change-disconnected .node-glyph', '--danger'],
     ['.live-state.running', '--accent']]);
