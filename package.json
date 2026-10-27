@@ -3,7 +3,7 @@
   "displayName": "USB Device Tree",
   "description": "Browse Windows USB controllers, hubs, ports, and connected devices in VS Code.",
   "icon": "resources/extension-icon.png",
-  "version": "0.13.0",
+  "version": "0.14.0",
   "publisher": "brian-chang",
   "repository": {
     "type": "git",
@@ -27,11 +27,15 @@
     "onCommand:usbDeviceTree.exportSnapshot"
   ],
   "main": "./source/extension.js",
+  "l10n": "./l10n",
   "files": [
     "source/",
     "resources/",
     "docs/",
     "native/bin/win32-x64/usb-topology.exe",
+    "l10n/",
+    "package.nls.json",
+    "package.nls.zh-tw.json",
     "README.md",
     "CONTRIBUTING.md",
     "SECURITY.md",
@@ -47,32 +51,32 @@
     "commands": [
       {
         "command": "usbDeviceTree.expandAll",
-        "title": "USB Device Tree: Expand All",
+        "title": "%command.expandAll.title%",
         "icon": "$(chevron-down)"
       },
       {
         "command": "usbDeviceTree.refresh",
-        "title": "USB Device Tree: Refresh",
+        "title": "%command.refresh.title%",
         "icon": "$(refresh)"
       },
       {
         "command": "usbDeviceTree.search",
-        "title": "USB Device Tree: Search",
+        "title": "%command.search.title%",
         "icon": "$(search)"
       },
       {
         "command": "usbDeviceTree.exportSnapshot",
-        "title": "USB Device Tree: Export XML Snapshot",
+        "title": "%command.exportSnapshot.title%",
         "icon": "$(export)"
       },
       {
         "command": "usbDeviceTree.pauseAutoRefresh",
-        "title": "USB Device Tree: Pause Auto Refresh",
+        "title": "%command.pauseAutoRefresh.title%",
         "icon": "$(debug-pause)"
       },
       {
         "command": "usbDeviceTree.resumeAutoRefresh",
-        "title": "USB Device Tree: Resume Auto Refresh",
+        "title": "%command.resumeAutoRefresh.title%",
         "icon": "$(play)"
       }
     ],
@@ -80,7 +84,7 @@
       "activitybar": [
         {
           "id": "usbDeviceTree",
-          "title": "USB Device Tree",
+          "title": "%viewsContainer.usbDeviceTree.title%",
           "icon": "resources/usb-device-tree.svg"
         }
       ]
@@ -89,7 +93,7 @@
       "usbDeviceTree": [
         {
           "id": "usbDeviceTree.devices",
-          "name": "USB Devices",
+          "name": "%view.devices.name%",
           "type": "webview"
         }
       ]
@@ -135,13 +139,13 @@
       ]
     },
     "configuration": {
-      "title": "USB Device Tree",
+      "title": "%config.title%",
       "properties": {
         "usbDeviceTree.autoRefreshEnabled": {
           "type": "boolean",
           "default": true,
           "scope": "application",
-          "description": "Automatically refresh the USB tree while its view is visible."
+          "description": "%config.autoRefreshEnabled.description%"
         },
         "usbDeviceTree.refreshIntervalSeconds": {
           "type": "integer",
@@ -149,7 +153,7 @@
           "minimum": 2,
           "maximum": 60,
           "scope": "application",
-          "description": "Interval in seconds between automatic USB topology refreshes."
+          "description": "%config.refreshIntervalSeconds.description%"
         }
       }
     }

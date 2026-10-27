@@ -1,45 +1,99 @@
-:root{color-scheme:dark;--bg:#080d0a;--panel:#111b14;--panel-hover:#1b2a20;--line:#31513a;--text:#e5f5e8;--muted:#a4c3aa;--green:#89e829;--red:#f17469}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font:12px/1.45 var(--vscode-font-family,'Segoe UI',sans-serif)}
-button,input{font:inherit}
-button:focus-visible,input:focus-visible,.node-row:focus-visible{outline:2px solid var(--green);outline-offset:-2px}
-.tree-shell{min-height:100vh;background:radial-gradient(circle at 100% 0%,#16402344 0,transparent 42%),var(--bg)}
-.tree-header{padding:21px 16px 12px;border-bottom:1px solid var(--line)}
-.overline{font:700 10px/1.2 Consolas,'Cascadia Code',monospace;letter-spacing:.12em;color:var(--green)}
-.title-line{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:7px}
-h1{font-size:17px;line-height:1.1;letter-spacing:.055em;margin:0;font-weight:750}
-.live-state{color:var(--muted);font:700 10px Consolas,monospace;letter-spacing:.08em;white-space:nowrap}
-.live-state.running{color:var(--green)}
-.live-state.running:before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;background:currentColor;margin-right:6px;box-shadow:0 0 9px currentColor}
-.tree-tools{padding:14px 12px 8px}
-.search-label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
-.tree-search{width:100%;height:32px;background:var(--panel);border:1px solid var(--line);color:var(--text);padding:0 10px;border-radius:5px;outline:none}
-.tree-search::placeholder{color:#829080}
-.tree-actions{display:flex;gap:4px;overflow-x:auto;padding:0 12px 10px;scrollbar-width:thin}
-.tree-actions button{border:1px solid var(--line);background:var(--panel-hover);color:var(--text);padding:5px 8px;border-radius:4px;white-space:nowrap;cursor:pointer}
-.tree-actions button:hover{border-color:var(--green);color:var(--green)}
-.tree-status{min-height:20px;padding:2px 14px 8px;color:var(--muted);font-size:11px}
-.tree-status:empty{display:none}
-.tree-list{padding:4px 0 30px}
-.tree-group{margin:0}
-.node-row{display:flex;align-items:center;min-height:29px;gap:4px;padding:3px 10px 3px calc(8px + var(--depth)*13px);cursor:pointer;position:relative;border-left:2px solid transparent}
-.node-row:hover{background:var(--panel-hover)}
-.node-row.selected{background:#29432b;border-left-color:var(--green)}
-.node-row.controller{margin-top:8px;min-height:37px;background:linear-gradient(145deg,#16251a,#0e1812);border-top:1px solid var(--line);border-bottom:1px solid var(--line);font-weight:700}
-.node-row.controller:before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--green)}
-.node-row.hub{color:#dce6d9;font-weight:650}
-.node-row.port:not(.connected){color:#9baa9b}
-.disclosure{width:16px;min-width:16px;border:0;background:none;color:var(--muted);padding:0;cursor:pointer;font-size:12px}
-.node-row:not(.branch) .disclosure{visibility:hidden}
-.node-glyph{width:9px;min-width:9px;height:9px;border:1px solid currentColor;border-radius:50%;color:#748373}
-.connected .node-glyph{background:var(--green);border-color:var(--green);box-shadow:0 0 8px #91e54566}
-.change-disconnected .node-glyph{background:var(--red);border-color:var(--red);box-shadow:0 0 8px #f1746966}
-.change-connected .node-glyph{animation:pulse 1.8s ease-out}
-@keyframes pulse{0%,100%{box-shadow:0 0 0 0 #91e54522}40%{box-shadow:0 0 0 6px #91e54566}}
-.node-copy{min-width:0;flex:1;display:flex;flex-direction:column}
-.node-label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.node-meta{color:var(--muted);font:10px/1.4 Consolas,monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.node-row.controller .node-meta{color:var(--green)}
-.empty-state{padding:24px 16px;color:var(--muted);line-height:1.6}
-@media (max-width:230px){.tree-header{padding-left:12px}.tree-actions button{padding:5px 6px}.node-row{padding-right:5px}}
-@media (prefers-reduced-motion:reduce){.change-connected .node-glyph{animation:none}}
+:root {
+  --base: var(--vscode-sideBar-background, var(--vscode-editor-background));
+  --surface: var(--vscode-editorWidget-background, var(--base));
+  --raised: var(--vscode-list-hoverBackground, var(--surface));
+  --line: var(--vscode-panel-border, var(--vscode-widget-border, #80808059));
+  --text: var(--vscode-foreground);
+  --muted: var(--vscode-descriptionForeground);
+  --danger: var(--vscode-errorForeground);
+  --warn: var(--vscode-editorWarning-foreground);
+  --accent: #89e829;
+  --accent-fg: #080d0a;
+  --focus: var(--accent);
+  --glow: 0 0 14px #89e82966;
+  --grid: radial-gradient(ellipse at 95% 0%, #16402344, transparent 37%),
+          linear-gradient(#75e73e08 1px, transparent 1px),
+          linear-gradient(90deg, #75e73e08 1px, transparent 1px);
+  --font: var(--vscode-font-family, 'Segoe UI', sans-serif);
+  --mono: var(--vscode-editor-font-family, Consolas, monospace);
+}
+body.vscode-light { --accent: #3a7d0a; --accent-fg: #ffffff; --glow: none; --grid: none; }
+body.vscode-high-contrast, body.vscode-high-contrast-light {
+  --accent: var(--vscode-contrastActiveBorder, var(--vscode-focusBorder));
+  --accent-fg: var(--vscode-editor-background);
+  --focus: var(--vscode-focusBorder);
+  --glow: none; --grid: none;
+}
+/* components */
+* { box-sizing: border-box; }
+body { margin: 0; color: var(--text); font: 13px/1.55 var(--font);
+  background: var(--grid), var(--base); background-size: auto, 32px 32px, 32px 32px, auto; }
+body.vscode-light, body.vscode-high-contrast, body.vscode-high-contrast-light { background: var(--base); }
+.eyebrow { margin: 0 0 4px; color: var(--accent); font: 700 10px/1.2 var(--mono); letter-spacing: .16em; text-transform: uppercase; }
+h1 { margin: 0; font: 700 20px/1.15 var(--mono); letter-spacing: .035em; text-shadow: var(--glow); }
+h1::before { content: ""; display: inline-block; width: 6px; height: .85em; margin-right: 9px; background: var(--accent); box-shadow: var(--glow); }
+h2 { margin: 0 0 8px; color: var(--muted); font-size: 10px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; }
+button { min-height: 30px; padding: 6px 10px; border: 1px solid var(--line); border-radius: 4px;
+  background: var(--raised); color: var(--text); font: inherit; font-weight: 600; cursor: pointer; }
+button:hover:not(:disabled) { border-color: var(--accent); }
+button:disabled { opacity: .5; cursor: not-allowed; }
+button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
+button.danger { background: transparent; border-color: var(--danger); color: var(--danger); }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.card { position: relative; padding: 12px 14px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+.card::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--accent); opacity: .6; }
+.metric { padding: 9px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+.metric span { display: block; color: var(--muted); font-size: 10px; font-weight: 700; letter-spacing: .04em; }
+.metric strong { display: block; color: var(--accent); font: 700 19px/1.2 var(--mono); font-variant-numeric: tabular-nums; text-shadow: var(--glow); }
+.status { margin: 12px 0; padding: 4px 0 4px 8px; border-left: 2px solid var(--accent); color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
+.status.error { border-color: var(--danger); color: var(--danger); }
+.tag { display: inline-block; padding: 1px 6px; border: 1px solid var(--line); border-radius: 3px; color: var(--muted); font-size: 11px; }
+.tag.ok { border-color: var(--accent); color: var(--accent); }
+.tag.warn { border-color: var(--warn); color: var(--warn); }
+.tag.danger { border-color: var(--danger); color: var(--danger); }
+.empty { padding: 16px 10px; border: 1px dashed var(--line); border-radius: 6px; color: var(--muted); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+/* tree: the guide block above is generated from source/style.js guideCss('sideBar'); keep it identical. */
+body { font-size: 12px; line-height: 1.45; }
+button, input { font: inherit; }
+.node-row:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+.tree-shell { min-height: 100vh; }
+.tree-header { padding: 21px 16px 12px; border-bottom: 1px solid var(--line); }
+.title-line { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 7px; }
+h1 { font-size: 17px; line-height: 1.1; }
+.live-state { color: var(--muted); font: 700 10px var(--mono); letter-spacing: .08em; white-space: nowrap; }
+.live-state.running { color: var(--accent); }
+.live-state.running::before { content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: currentColor; margin-right: 6px; box-shadow: var(--glow); }
+.tree-tools { padding: 14px 12px 8px; }
+.search-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.tree-search { width: 100%; height: 32px; background: var(--surface); border: 1px solid var(--line); color: var(--text); padding: 0 10px; border-radius: 4px; }
+.tree-search::placeholder { color: var(--muted); }
+.tree-search:focus-visible { outline: 2px solid var(--focus); outline-offset: -1px; }
+.tree-actions { display: flex; flex-wrap: wrap; gap: 4px; padding: 0 12px 10px; }
+.tree-actions button { min-height: 26px; padding: 4px 8px; white-space: nowrap; }
+.tree-actions button:hover { color: var(--accent); }
+.tree-status { min-height: 20px; margin: 0 12px 8px; padding: 2px 0 2px 8px; border-left: 2px solid var(--accent); color: var(--muted); font-size: 11px; overflow-wrap: anywhere; }
+.tree-status:empty { display: none; }
+.tree-list { padding: 4px 0 30px; }
+.tree-group { margin: 0; }
+.node-row { display: flex; align-items: center; min-height: 29px; gap: 4px; padding: 3px 10px 3px calc(8px + var(--depth) * 13px); cursor: pointer; position: relative; border-left: 2px solid transparent; }
+.node-row:hover { background: var(--raised); }
+.node-row.selected { background: color-mix(in srgb, var(--accent) 16%, transparent); border-left-color: var(--accent); }
+.node-row.controller { margin-top: 8px; min-height: 37px; background: var(--surface); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); font-weight: 700; }
+.node-row.controller.selected { background: color-mix(in srgb, var(--accent) 16%, var(--surface)); }
+.node-row.controller::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--accent); }
+.node-row.hub { color: var(--text); font-weight: 650; }
+.node-row.port:not(.connected) { color: var(--muted); }
+.disclosure { width: 16px; min-width: 16px; min-height: 0; border: 0; background: none; color: var(--muted); padding: 0; cursor: pointer; font-size: 12px; }
+.node-row:not(.branch) .disclosure { visibility: hidden; }
+.node-glyph { width: 9px; min-width: 9px; height: 9px; border: 1px solid currentColor; border-radius: 50%; color: var(--muted); }
+.connected .node-glyph { background: var(--accent); border-color: var(--accent); box-shadow: var(--glow); }
+.change-disconnected .node-glyph { background: var(--danger); border-color: var(--danger); box-shadow: 0 0 8px color-mix(in srgb, var(--danger) 40%, transparent); }
+.change-connected .node-glyph { animation: pulse 1.8s ease-out; }
+@keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 13%, transparent); } 40% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 40%, transparent); } }
+.node-copy { min-width: 0; flex: 1; display: flex; flex-direction: column; }
+.node-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.node-meta { color: var(--muted); font: 10px/1.4 var(--mono); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.node-row.controller .node-meta { color: var(--accent); }
+.empty-state { margin: 12px; padding: 16px 10px; border: 1px dashed var(--line); border-radius: 6px; color: var(--muted); line-height: 1.6; }
+@media (max-width: 230px) { .tree-header { padding-left: 12px; } .tree-actions button { padding: 4px 6px; } .node-row { padding-right: 5px; } }

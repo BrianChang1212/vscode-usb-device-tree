@@ -1,0 +1,13 @@
+{
+  "command.expandAll.title": "USB Device Tree：全部展開",
+  "command.refresh.title": "USB Device Tree：重新整理",
+  "command.search.title": "USB Device Tree：搜尋",
+  "command.exportSnapshot.title": "USB Device Tree：匯出 XML 快照",
+  "command.pauseAutoRefresh.title": "USB Device Tree：暫停自動重新整理",
+  "command.resumeAutoRefresh.title": "USB Device Tree：繼續自動重新整理",
+  "viewsContainer.usbDeviceTree.title": "USB 裝置樹",
+  "view.devices.name": "USB 裝置",
+  "config.title": "USB Device Tree",
+  "config.autoRefreshEnabled.description": "檢視可見時自動重新整理 USB 樹。",
+  "config.refreshIntervalSeconds.description": "USB 拓撲自動重新整理的間隔秒數。"
+}

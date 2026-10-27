@@ -1,22 +1,27 @@
+const { englishT } = require('./l10n');
+
 function isAutomaticRefresh(options) {
   return options?.automatic === true;
 }
 
-function nodeDescription(node, stale) {
-  if (stale) return !node.parentId ? 'Last successful data' : undefined;
-  if (node.error === 'controllerQueryTimedOut') return 'Current query timed out';
-  if (node.error === 'controllerQueryFailed') return 'Current query failed';
+function nodeDescription(node, stale, t = englishT) {
+  if (stale) return !node.parentId ? t('Last successful data') : undefined;
+  if (node.error === 'controllerQueryTimedOut') return t('Current query timed out');
+  if (node.error === 'controllerQueryFailed') return t('Current query failed');
   return undefined;
 }
 
-function viewStatus({ searchEmpty = false, stale = false, staleReason,
-  partialFailures = 0, autoRefreshRunning = false, intervalSeconds = 5,
-  visible = false, enabled = true } = {}) {
-  if (searchEmpty) return 'No USB nodes match the search.';
-  if (stale) return staleReason || 'Refresh failed; showing the last successful data.';
-  if (partialFailures) return `Other controllers updated; ${partialFailures} controller ${partialFailures === 1 ? 'query' : 'queries'} failed.`;
-  if (autoRefreshRunning) return `Auto refresh every ${intervalSeconds} seconds; pause it from the toolbar.`;
-  if (visible && !enabled) return 'Auto refresh is paused; refresh manually from the toolbar.';
+function viewStatus(options = {}) {
+  const { searchEmpty = false, stale = false, staleReason,
+    partialFailures = 0, autoRefreshRunning = false, intervalSeconds = 5,
+    visible = false, enabled = true } = options;
+  const t = options.t || englishT;
+  if (searchEmpty) return t('No USB nodes match the search.');
+  if (stale) return staleReason || t('Refresh failed; showing the last successful data.');
+  if (partialFailures === 1) return t('Other controllers updated; 1 controller query failed.');
+  if (partialFailures) return t('Other controllers updated; {0} controller queries failed.', partialFailures);
+  if (autoRefreshRunning) return t('Auto refresh every {0} seconds; pause it from the toolbar.', intervalSeconds);
+  if (visible && !enabled) return t('Auto refresh is paused; refresh manually from the toolbar.');
   return undefined;
 }
 

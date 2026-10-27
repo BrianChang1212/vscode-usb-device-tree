@@ -9,7 +9,12 @@
   const expanded = new Set(saved.expanded || []);
   let initialized = Boolean(saved.initialized);
   let selectedId = saved.selectedId || '';
-  let state = { nodes: [], query: '', message: '', paused: false, hasData: false };
+  let state = { nodes: [], query: '', message: '', paused: false, hasData: false, strings: {} };
+  // Copy of source/l10n.js format(); strings come translated from the extension host (state.strings).
+  function format(message, args) {
+    return String(message).replace(/\{(\d+)\}/g, (match, index) => (args[index] === undefined ? match : String(args[index])));
+  }
+  const S = (key) => state.strings?.[key] || '';
 
   function visibleRows() { return [...list.querySelectorAll('.node-row')]; }
   function saveState() { vscode.setState?.({ expanded: [...expanded], selectedId, initialized }); }
@@ -37,7 +42,7 @@
     disclosure.type = 'button';
     disclosure.tabIndex = -1;
     disclosure.textContent = open ? '⌄' : '›';
-    disclosure.setAttribute('aria-label', `${open ? 'Collapse' : 'Expand'} ${node.label}`);
+    disclosure.setAttribute('aria-label', format(open ? S('collapseNode') : S('expandNode'), [node.label]));
     disclosure.addEventListener('click', (event) => {
       event.stopPropagation();
       if (open) expanded.delete(node.id); else expanded.add(node.id);
@@ -125,15 +130,14 @@
     if (!state.nodes.length) {
       const empty = document.createElement('div');
       empty.className = 'empty-state';
-      empty.textContent = state.query.trim() ? 'No USB nodes match the search.' :
-        state.hasData ? 'No USB nodes to display.' : 'Waiting for a USB topology scan.';
+      empty.textContent = state.query.trim() ? S('noMatches') : state.hasData ? S('noNodes') : S('waiting');
       list.append(empty);
     }
     if (state.query !== search.value) search.value = state.query;
     status.textContent = state.message;
-    live.textContent = state.running ? 'LIVE' : state.paused ? 'PAUSED' : 'IDLE';
+    live.textContent = state.running ? S('live') : state.paused ? S('paused') : S('idle');
     live.classList.toggle('running', Boolean(state.running));
-    pause.textContent = state.paused ? 'Resume' : 'Pause';
+    pause.textContent = state.paused ? S('resume') : S('pause');
     if (focusedId) list.querySelector(`[data-id="${CSS.escape(focusedId)}"]`)?.focus();
   }
 

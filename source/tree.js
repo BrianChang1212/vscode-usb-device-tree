@@ -1,27 +1,34 @@
 const { decodeBosDescriptor, decodeExtraDescriptor } = require('./descriptors');
+const { englishT } = require('./l10n');
 
-function deviceLabel(node) {
+// Labels are display text (translated through t); detail lines and section titles stay English because
+// detail.js parses them and translates at render time.
+
+function deviceLabel(node, t = englishT) {
   if (node._displayLabel) return node._displayLabel;
   if (node.type === 'controller') {
     return node.pnpProperties?.friendlyName || node.pnpProperties?.pnpDescription
-      || node.name || 'USB Host Controller';
+      || node.name || t('USB Host Controller');
   }
-  if (node.type === 'hub') return node.name || 'USB Hub';
+  if (node.type === 'hub') return node.name || t('USB Hub');
   if (node.type === 'port') {
     const attached = (node.children || []).find((child) => child.type === 'device');
     const friendly = attached?.pnpProperties?.friendlyName;
-    return friendly ? `Port ${node.port}: ${friendly}` : `Port ${node.port}: ${node.status || 'unknown'}`;
+    // Port status codes come from Windows in English; show them translated, keep other codes as-is.
+    const status = node.status === 'connected' ? t('connected')
+      : node.status === 'disconnected' ? t('disconnected') : node.status;
+    return t('Port {0}: {1}', node.port, friendly || status || 'unknown');
   }
-  if (node.type === 'serialPort') return `${node.portName}: ${node.friendlyName || 'Serial port'}`;
+  if (node.type === 'serialPort') return `${node.portName}: ${node.friendlyName || t('Serial port')}`;
   if (node.type === 'pnpDevice' && node.portName) {
-    const name = node.name || node.pnpProperties?.friendlyName || 'Serial port';
+    const name = node.name || node.pnpProperties?.friendlyName || t('Serial port');
     return name.includes(`(${node.portName})`) ? name : `${node.portName}: ${name}`;
   }
   if (node.type === 'device') {
     const vendor = Number.isInteger(node.vendorId) ? node.vendorId.toString(16).padStart(4, '0') : '????';
     const product = Number.isInteger(node.productId) ? node.productId.toString(16).padStart(4, '0') : '????';
     const friendly = node.pnpProperties?.friendlyName;
-    const productName = friendly || node.product || node.pnpProperties?.pnpDescription || node.name || 'USB device';
+    const productName = friendly || node.product || node.pnpProperties?.pnpDescription || node.name || t('USB device');
     const maker = !friendly && node.product && node.manufacturer ? `${node.manufacturer} ` : '';
     const ports = (node.serialPorts || []).map((item) => item.portName).filter(Boolean);
     const missingPorts = ports.filter((port) => !productName.includes(`(${port})`));
@@ -51,7 +58,7 @@ function nodeChildren(node) {
   ];
 }
 
-function displayNode(node) {
+function displayNode(node, t = englishT) {
   if (node.type !== 'port' || !Array.isArray(node.children) || node.children.length !== 1 ||
       node.children[0].type !== 'device') return node;
   const device = node.children[0];
@@ -59,7 +66,7 @@ function displayNode(node) {
   const childNodes = nodeChildren(device).filter((child) => child !== hub);
   if (hub) childNodes.push(...nodeChildren(hub));
   const friendly = device.pnpProperties?.friendlyName;
-  const name = friendly || deviceLabel(device);
+  const name = friendly || deviceLabel(device, t);
   const missingPorts = (friendly ? device.serialPorts || [] : []).map((port) => port.portName)
     .filter((port) => port && !name.includes(`(${port})`));
   const visibleName = `${name}${missingPorts.length ? ` [${missingPorts.join(', ')}]` : ''}`;
@@ -67,7 +74,7 @@ function displayNode(node) {
     ...node, ...device,
     type: 'port', port: node.port, status: node.status,
     error: node.error || device.error,
-    _displayLabel: `Port ${node.port}: ${visibleName}`,
+    _displayLabel: t('Port {0}: {1}', node.port, visibleName),
     _displayDetail: [nodeDetail(node), `USB device: ${name}`, nodeDetail(device),
       hub ? `Hub: ${hub.name || 'USB Hub'}\n${nodeDetail(hub)}` : ''].filter(Boolean).join('\n\n'),
     _detailSections: [
@@ -185,9 +192,9 @@ function formatBcd(value) {
   return `${Number(hex.slice(0, 2))}.${hex.slice(2)} (0x${hex})`;
 }
 
-function toTreeNodes(nodes, parentId = '') {
+function toTreeNodes(nodes, parentId = '', t = englishT) {
   return nodes.map((input, index) => {
-    const node = displayNode(input);
+    const node = displayNode(input, t);
     const id = parentId ? `${parentId}.${index}` : String(index);
     const children = nodeChildren(node);
     return {
@@ -244,14 +251,14 @@ function toTreeNodes(nodes, parentId = '') {
       companionPortNumber: node.companionPortNumber,
       companionHub: node.companionHub,
       companions: node.companions,
-      label: deviceLabel(node),
+      label: deviceLabel(node, t),
       detailText: node._displayDetail || nodeDetail(node),
       detailSections: node._detailSections || [{
         title: node.type === 'controller' ? 'Host Controller' : node.type === 'hub' ? 'Hub'
           : node.type === 'port' ? 'Physical Port' : node.type === 'serialPort' ? 'COM Port' : 'USB Device',
         text: nodeDetail(node),
       }],
-      children: toTreeNodes(children, id),
+      children: toTreeNodes(children, id, t),
     };
   });
 }

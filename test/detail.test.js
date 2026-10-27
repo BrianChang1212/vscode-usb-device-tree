@@ -3,7 +3,7 @@ const test = require('node:test');
 
 const { renderDetailHtml } = require('../source/detail');
 
-test('renders a fixed dark device summary and accessible detail tabs', () => {
+test('renders a themed device summary and accessible detail tabs', () => {
   const html = renderDetailHtml({ label: 'Port 5: Radio', port: 5, status: 'connected',
     vendorId: 0x0489, productId: 0xe122, speed: 'full', deviceClass: 0xe0,
     detailSections: [
@@ -20,7 +20,7 @@ test('renders a fixed dark device summary and accessible detail tabs', () => {
   assert.match(html, /USB Device/);
   assert.match(html, /Windows PnP/);
   assert.match(html, /Raw Data/);
-  assert.match(html, /--surface: #080d0a/);
+  assert.match(html, /--base: var\(--vscode-editor-background\)/);
 });
 
 test('renders node labels and device details as escaped, script-free HTML', () => {

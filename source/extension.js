@@ -6,6 +6,7 @@ const { createAutoRefreshPauseState } = require('./auto-refresh-pause');
 const { DetailsPanel } = require('./detail');
 const { TransientHighlights } = require('./device-changes');
 const { DeviceChangeWatcher } = require('./device-watch');
+const { englishT, translator } = require('./l10n');
 const { queryUsbTopology } = require('./native');
 const { isAutomaticRefresh, viewStatus } = require('./refresh-status');
 const { createSnapshot, exportSnapshot } = require('./snapshot');
@@ -13,8 +14,9 @@ const { filterTreeNodes, toTreeNodes } = require('./tree');
 const { UsbTreeWebview } = require('./webview-tree');
 
 class UsbDeviceTreeProvider {
-  constructor(highlights) {
+  constructor(highlights, t = englishT) {
     this.highlights = highlights;
+    this.t = t;
     this.nodes = [];
     this.allNodes = [];
     this.nodesById = new Map();
@@ -27,7 +29,7 @@ class UsbDeviceTreeProvider {
   }
 
   setTopology(topology) {
-    const nextNodes = toTreeNodes(topology.controllers);
+    const nextNodes = toTreeNodes(topology.controllers, '', this.t);
     this.highlights?.apply(this.allNodes, nextNodes);
     this.allNodes = nextNodes;
     this.nodes = filterTreeNodes(this.allNodes, this.searchQuery);
@@ -63,24 +65,25 @@ class UsbDeviceTreeProvider {
   }
 }
 
-function friendlyError(error) {
+function friendlyError(error, t = englishT) {
   switch (error.code) {
-    case 'UNSUPPORTED_PLATFORM': return 'USB Device Tree currently supports Windows x64.';
-    case 'NATIVE_NOT_FOUND': return 'The bundled USB topology helper was not found. Reinstall the extension.';
-    case 'PROCESS_TIMEOUT': return 'USB topology query timed out; keeping the last successful data.';
+    case 'UNSUPPORTED_PLATFORM': return t('USB Device Tree currently supports Windows x64.');
+    case 'NATIVE_NOT_FOUND': return t('The bundled USB topology helper was not found. Reinstall the extension.');
+    case 'PROCESS_TIMEOUT': return t('USB topology query timed out; keeping the last successful data.');
     case 'OUTPUT_TOO_LARGE':
-    case 'TOO_MANY_NODES': return 'USB topology exceeded the size limit; keeping the last successful data.';
+    case 'TOO_MANY_NODES': return t('USB topology exceeded the size limit; keeping the last successful data.');
     case 'MALFORMED_JSON':
-    case 'INVALID_TOPOLOGY': return 'The USB topology helper returned invalid data; keeping the last successful data.';
-    default: return 'Could not update the USB device tree; keeping the last successful data.';
+    case 'INVALID_TOPOLOGY': return t('The USB topology helper returned invalid data; keeping the last successful data.');
+    default: return t('Could not update the USB device tree; keeping the last successful data.');
   }
 }
 
 function activate(context) {
+  const t = translator(vscode);
   const highlights = new TransientHighlights(() => {
     provider.onDidChangeTreeDataEmitter.fire(undefined);
   });
-  const provider = new UsbDeviceTreeProvider(highlights);
+  const provider = new UsbDeviceTreeProvider(highlights, t);
   const detailsPanel = new DetailsPanel(vscode, context.subscriptions);
   const treeView = new UsbTreeWebview(vscode, context.extensionUri, provider, highlights, (action) => {
     const command = action === 'expand' ? 'expandAll' : action === 'pause'
@@ -130,15 +133,15 @@ function activate(context) {
           lastSuccessfulSnapshot = snapshot;
           updateMessage();
         } catch (error) {
-          provider.markStale(friendlyError(error));
+          provider.markStale(friendlyError(error, t));
           updateMessage();
-          if (!automatic) await vscode.window.showErrorMessage(friendlyError(error));
+          if (!automatic) await vscode.window.showErrorMessage(friendlyError(error, t));
         }
       };
       try {
         if (automatic) await readTopology();
         else await vscode.window.withProgress(
-          { location: vscode.ProgressLocation.Window, title: 'Querying USB device tree' }, readTopology,
+          { location: vscode.ProgressLocation.Window, title: t('Querying USB device tree') }, readTopology,
         );
       } finally {
         refreshing = false;
@@ -157,7 +160,7 @@ function activate(context) {
     vscode.commands.registerCommand('usbDeviceTree.search', async () => {
       const query = await vscode.window.showInputBox({
         ignoreFocusOut: true,
-        prompt: 'Search USB node names, ports, status, or device details',
+        prompt: t('Search USB node names, ports, status, or device details'),
         value: provider.searchQuery,
       });
       if (query === undefined) return;
@@ -166,14 +169,14 @@ function activate(context) {
     }),
     vscode.commands.registerCommand('usbDeviceTree.exportSnapshot', async () => {
       if (!lastSuccessfulSnapshot) {
-        await vscode.window.showWarningMessage('Query the USB device tree before exporting XML.');
+        await vscode.window.showWarningMessage(t('Query the USB device tree before exporting XML.'));
         return;
       }
       try {
         const saved = await exportSnapshot(vscode, lastSuccessfulSnapshot);
-        if (saved) await vscode.window.showInformationMessage('USB Device Tree XML snapshot exported.');
+        if (saved) await vscode.window.showInformationMessage(t('USB Device Tree XML snapshot exported.'));
       } catch {
-        await vscode.window.showErrorMessage('Could not export the USB XML snapshot.');
+        await vscode.window.showErrorMessage(t('Could not export the USB XML snapshot.'));
       }
     }),
   );
@@ -215,6 +218,7 @@ function activate(context) {
       intervalSeconds: vscode.workspace.getConfiguration('usbDeviceTree').get('refreshIntervalSeconds', 5),
       visible: treeView.visible,
       enabled: isAutoRefreshEnabled(),
+      t,
     });
     treeView.update();
   }

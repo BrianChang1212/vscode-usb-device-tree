@@ -1,5 +1,6 @@
 const fs = require('node:fs/promises');
 const { decodeBosDescriptor } = require('./descriptors');
+const { translator } = require('./l10n');
 
 function escapeXml(value) {
   return String(value).replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\ufffe\uffff]/g, '\uFFFD')
@@ -98,10 +99,11 @@ function createSnapshot(topology, { generatedAt = new Date().toISOString() } = {
 }
 
 async function exportSnapshot(vscode, xmlBuffer, { writeFile = fs.writeFile } = {}) {
+  const t = translator(vscode);
   const destination = await vscode.window.showSaveDialog({
-    filters: { 'XML reports': ['xml'] },
-    saveLabel: 'Export XML Snapshot',
-    title: 'Export USB XML Snapshot',
+    filters: { [t('XML reports')]: ['xml'] },
+    saveLabel: t('Export XML Snapshot'),
+    title: t('Export USB XML Snapshot'),
   });
   if (!destination) return false;
 

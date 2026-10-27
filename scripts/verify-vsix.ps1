@@ -28,7 +28,9 @@ try {
     }
   }
 
-  foreach ($relativePath in @($expected.main, $expected.icon, 'native/bin/win32-x64/usb-topology.exe')) {
+  $requiredFiles = @($expected.main, $expected.icon, 'native/bin/win32-x64/usb-topology.exe',
+    'package.nls.json', 'package.nls.zh-tw.json', 'l10n/bundle.l10n.zh-tw.json', 'resources/tree.css', 'resources/tree.js')
+  foreach ($relativePath in $requiredFiles) {
     $entryPath = 'extension/' + $relativePath.TrimStart('.', '/', '\').Replace('\', '/')
     $entry = $archive.GetEntry($entryPath)
     if ($null -eq $entry -or $entry.Length -eq 0) {

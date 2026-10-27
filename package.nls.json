@@ -1,0 +1,13 @@
+{
+  "command.expandAll.title": "USB Device Tree: Expand All",
+  "command.refresh.title": "USB Device Tree: Refresh",
+  "command.search.title": "USB Device Tree: Search",
+  "command.exportSnapshot.title": "USB Device Tree: Export XML Snapshot",
+  "command.pauseAutoRefresh.title": "USB Device Tree: Pause Auto Refresh",
+  "command.resumeAutoRefresh.title": "USB Device Tree: Resume Auto Refresh",
+  "viewsContainer.usbDeviceTree.title": "USB Device Tree",
+  "view.devices.name": "USB Devices",
+  "config.title": "USB Device Tree",
+  "config.autoRefreshEnabled.description": "Automatically refresh the USB tree while its view is visible.",
+  "config.refreshIntervalSeconds.description": "Interval in seconds between automatic USB topology refreshes."
+}

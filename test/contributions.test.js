@@ -5,6 +5,9 @@ const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
 const manifest = require(path.join(root, 'package.json'));
+const nls = require(path.join(root, 'package.nls.json'));
+const nlsZh = require(path.join(root, 'package.nls.zh-tw.json'));
+const resolve = (value) => value.replace(/^%(.+)%$/, (_match, key) => nls[key]);
 
 test('USB Devices is contributed under its own Activity Bar container', () => {
   const container = manifest.contributes.viewsContainers.activitybar.find(
@@ -12,7 +15,9 @@ test('USB Devices is contributed under its own Activity Bar container', () => {
   );
 
   assert.ok(container, 'USB Device Tree Activity Bar container is missing');
-  assert.equal(container.title, 'USB Device Tree');
+  assert.equal(container.title, '%viewsContainer.usbDeviceTree.title%');
+  assert.equal(resolve(container.title), 'USB Device Tree');
+  assert.equal(nlsZh['viewsContainer.usbDeviceTree.title'], 'USB 裝置樹');
   assert.equal(container.icon, 'resources/usb-device-tree.svg');
   assert.ok(fs.existsSync(path.join(root, container.icon)), 'container icon is missing');
 
@@ -37,7 +42,8 @@ test('exposes Expand All in the USB view title without adding a command-palette 
   const titleAction = manifest.contributes.menus['view/title'].find((entry) => entry.command === commandId);
   const paletteAction = manifest.contributes.menus.commandPalette.find((entry) => entry.command === commandId);
 
-  assert.equal(command.title, 'USB Device Tree: Expand All');
+  assert.equal(resolve(command.title), 'USB Device Tree: Expand All');
+  assert.equal(nlsZh['command.expandAll.title'], 'USB Device Tree：全部展開');
   assert.equal(command.icon, '$(chevron-down)');
   assert.equal(titleAction.when, 'view == usbDeviceTree.devices');
   assert.equal(paletteAction.when, 'false');
