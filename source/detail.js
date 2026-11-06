@@ -1,5 +1,6 @@
 const { englishT, htmlLang, translator } = require('./l10n');
 const { guideCss } = require('./style');
+const { randomBytes } = require('node:crypto');
 
 function escapeHtml(value) {
   return String(value)
@@ -201,7 +202,7 @@ dd { margin: 0; overflow-wrap: anywhere; font-family: var(--mono); font-size: 12
 @media (max-width: 550px) { .field { grid-template-columns: 1fr; gap: 2px; } .device-hero, .device-section { padding: 16px; } }
 `;
 
-function renderDetailHtml(node, t = englishT, language = 'en') {
+function renderDetailHtml(node, t = englishT, language = 'en', runtime) {
   const sections = Array.isArray(node.detailSections) && node.detailSections.length
     ? node.detailSections : node.detailText ? [{ title: 'Details', text: node.detailText }] : [];
   const hasPort = sections.some((section) => section.title.toLowerCase().includes('physical port'));
@@ -215,36 +216,50 @@ function renderDetailHtml(node, t = englishT, language = 'en') {
 <html lang="${htmlLang(language)}">
 <head>
   <meta charset="utf-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline';${runtime ? ` script-src 'nonce-${escapeHtml(runtime.nonce)}';` : ''}">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>${escapeHtml(node.label || t('USB Device'))}</title>
   <style>${guideCss('editor')}${DETAIL_CSS}</style>
 </head>
 <body>
   <main>${deviceSummary(node, t)}${node.staleReason ? `<p class="empty" role="status">${escapeHtml(node.staleReason)}</p>` : ''}${body}</main>
-</body>
+${runtime ? `<script nonce="${escapeHtml(runtime.nonce)}" src="${escapeHtml(runtime.uri)}"></script>` : ''}</body>
 </html>`;
 }
 
 class DetailsPanel {
-  constructor(vscode, subscriptions = []) {
+  constructor(vscode, subscriptions = [], extensionUri) {
     this.vscode = vscode;
     this.t = translator(vscode);
     this.panel = undefined;
     this.subscriptions = subscriptions;
+    this.extensionUri = extensionUri;
+    this.latestHtml = undefined;
+    this.ready = false;
   }
 
   show(node) {
     const t = this.t;
     if (!this.panel) {
+      const resources = this.vscode.Uri.joinPath(this.extensionUri, 'resources');
       this.panel = this.vscode.window.createWebviewPanel(
         'usbDeviceTree.details',
         t('USB Device Details'),
         this.vscode.ViewColumn.Beside,
-        { enableScripts: false, retainContextWhenHidden: false },
+        { enableScripts: true, retainContextWhenHidden: true, localResourceRoots: [resources] },
       );
       this.panel.onDidDispose(() => {
         this.panel = undefined;
+        this.latestHtml = undefined;
+        this.ready = false;
+      });
+      this.runtime = { nonce: randomBytes(24).toString('hex'),
+        uri: this.panel.webview.asWebviewUri(this.vscode.Uri.joinPath(resources, 'detail.js')) };
+      this.panel.webview.onDidReceiveMessage(message => {
+        if (message?.type === 'ready' && this.latestHtml) {
+          this.ready = true;
+          void this.panel?.webview.postMessage({ type: 'detail-update', html: this.latestHtml });
+        }
       });
       this.subscriptions.push(this.panel);
     }
@@ -256,7 +271,11 @@ class DetailsPanel {
   update(node) {
     if (!this.panel) return;
     this.panel.title = node.label || this.t('USB Device Details');
-    this.panel.webview.html = renderDetailHtml(node, this.t, this.vscode.env?.language);
+    const html = renderDetailHtml(node, this.t, this.vscode.env?.language, this.runtime);
+    if (html === this.latestHtml) return;
+    if (this.latestHtml === undefined) this.panel.webview.html = html;
+    else if (this.ready) void this.panel.webview.postMessage({ type: 'detail-update', html });
+    this.latestHtml = html;
   }
 }
 

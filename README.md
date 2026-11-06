@@ -40,6 +40,8 @@ After a failed refresh, the view marks the retained data as stale. XML export is
 
 An open detail panel follows the selected physical location through manual and automatic refreshes without taking focus. Disconnecting a device clears its live identity; reconnecting or replacing it updates the details. If the location disappears, the panel shows a disconnected message. Query failures retain the last successful details with an explicit stale warning instead of reporting a disconnection.
 
+Partial controller or hub query failures also retain selected details as stale. Background updates preserve the selected detail category, keyboard focus, and scroll position using a bundled runtime restricted by a per-panel script nonce.
+
 ## Development, testing, and VSIX packaging
 
 Requirements: Node.js 24, npm, Visual Studio 2022 C++ x64 Build Tools, and the Windows SDK.

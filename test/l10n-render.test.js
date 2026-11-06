@@ -137,7 +137,11 @@ test('extension layer sends notifications, InputBox and view HTML through vscode
     Uri: { joinPath: (...parts) => parts.join('/') },
     window: {
       registerWebviewViewProvider(_id, provider) { viewProvider = provider; return { dispose() {} }; },
-      createWebviewPanel(_type, title) { detailPanel = { title, webview: {}, onDidDispose() {}, reveal() {} }; return detailPanel; },
+      createWebviewPanel(_type, title) {
+        detailPanel = { title, webview: { asWebviewUri: value => value, onDidReceiveMessage() {} },
+          onDidDispose() {}, reveal() {} };
+        return detailPanel;
+      },
       showWarningMessage: async (message) => { shown.push(['warning', message]); },
       showErrorMessage: async (message) => { shown.push(['error', message]); },
       showInformationMessage: async (message) => { shown.push(['info', message]); },

@@ -1,4 +1,5 @@
 {
+  "USB location query failed; showing last successful data. Details: {0}": "USB 位置查詢失敗；顯示上次成功的資料。詳細資訊：{0}",
   "Selected USB location is disconnected.": "所選的 USB 位置已斷線。",
   "STALE": "資料過期",
   "Connection Status": "連線狀態",

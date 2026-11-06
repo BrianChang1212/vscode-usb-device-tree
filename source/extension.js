@@ -84,7 +84,7 @@ function activate(context) {
     provider.onDidChangeTreeDataEmitter.fire(undefined);
   });
   const provider = new UsbDeviceTreeProvider(highlights, t);
-  const detailsPanel = new DetailsPanel(vscode, context.subscriptions);
+  const detailsPanel = new DetailsPanel(vscode, context.subscriptions, context.extensionUri);
   const treeView = new UsbTreeWebview(vscode, context.extensionUri, provider, highlights, (action) => {
     const command = action === 'expand' ? 'expandAll' : action === 'pause'
       ? (pauseState.paused ? 'resumeAutoRefresh' : 'pauseAutoRefresh')
@@ -102,6 +102,13 @@ function activate(context) {
   let refreshing = false;
   let selectedRoute;
   let selectedPort;
+  let selectedSnapshot;
+
+  function detailState(node) {
+    const staleReason = provider.staleReason || (node.error
+      ? t('USB location query failed; showing last successful data. Details: {0}', node.error) : undefined);
+    return { ...node, staleReason };
+  }
 
   function nodeKey(node) {
     if (node.type === 'port') return `port:${node.port}`;
@@ -112,6 +119,7 @@ function activate(context) {
   function rememberSelection(node) {
     treeView.selectedId = node.id;
     selectedPort = node.port;
+    selectedSnapshot = node;
     selectedRoute = [];
     for (let item = node; item; item = provider.nodesById.get(item.parentId)) {
       selectedRoute.unshift(nodeKey(item));
@@ -122,14 +130,24 @@ function activate(context) {
     if (!selectedRoute) return;
     let nodes = provider.allNodes;
     let selected;
+    let failedAncestor;
     for (const key of selectedRoute) {
       const matches = nodes.filter(node => nodeKey(node) === key);
       selected = matches.length === 1 ? matches[0] : undefined;
       if (!selected) break;
+      if (selected.error) { failedAncestor = selected; break; }
       nodes = selected.children;
     }
+    if (failedAncestor) {
+      treeView.selectedId = '';
+      detailsPanel.update({ ...selectedSnapshot, staleReason: detailState(failedAncestor).staleReason });
+      return;
+    }
     treeView.selectedId = selected?.id || '';
-    if (selected) detailsPanel.update({ ...selected, staleReason: provider.staleReason });
+    if (selected) {
+      selectedSnapshot = selected;
+      detailsPanel.update(detailState(selected));
+    }
     else detailsPanel.update({ status: 'disconnected', port: selectedPort, staleReason: provider.staleReason,
       label: t('Selected USB location is disconnected.'),
       detailText: 'Status: disconnected' });
@@ -150,7 +168,7 @@ function activate(context) {
   treeView.onDidChangeSelection(({ selection }) => {
     if (selection[0]) {
       rememberSelection(selection[0]);
-      detailsPanel.show({ ...selection[0], staleReason: provider.staleReason });
+      detailsPanel.show(detailState(selection[0]));
     }
   }, undefined, context.subscriptions);
 

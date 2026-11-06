@@ -26,7 +26,7 @@ test('activates the contributed webview and routes its toolbar commands', async 
         return { dispose() {} };
       },
       createWebviewPanel() {
-        detailPanel = { webview: {}, onDidDispose() {}, reveal() {} };
+        detailPanel = { webview: { asWebviewUri: value => value, onDidReceiveMessage() {} }, onDidDispose() {}, reveal() {} };
         return detailPanel;
       },
     },

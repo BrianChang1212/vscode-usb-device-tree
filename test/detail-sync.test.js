@@ -11,7 +11,8 @@ function topology(name = 'Radio', connected = true) {
 
 function host(t) {
   const commands = new Map(), sent = [], reveals = [];
-  let provider, receive, panel, next;
+  let provider, receive, panel, next, detailReceive;
+  let htmlWrites = 0;
   class EventEmitter {
     constructor() { this.listeners = []; this.event = listener => {
       this.listeners.push(listener); return { dispose() {} };
@@ -23,7 +24,14 @@ function host(t) {
     Uri: { joinPath: (...parts) => parts.join('/') },
     window: {
       registerWebviewViewProvider(_id, value) { provider = value; return { dispose() {} }; },
-      createWebviewPanel() { panel = { webview: {}, onDidDispose() {}, reveal(...args) { reveals.push(args); } }; return panel; },
+      createWebviewPanel() {
+        let html;
+        panel = { webview: { get html() { return html; }, set html(value) { html = value; htmlWrites++; },
+          asWebviewUri: value => value, onDidReceiveMessage(listener) { detailReceive = listener; },
+          postMessage(message) { html = message.html; return Promise.resolve(true); } },
+          onDidDispose() {}, reveal(...args) { reveals.push(args); } };
+        return panel;
+      },
       withProgress(_options, run) { return run(); }, showErrorMessage() {},
     },
     commands: {
@@ -54,8 +62,11 @@ function host(t) {
   t.after(() => { for (const item of context.subscriptions) item.dispose?.(); });
   return {
     async refresh(value, automatic = false) { next = value; await commands.get('usbDeviceTree.refresh')({ automatic }); },
-    select(id) { receive({ type: 'select', id }); }, search(query) { receive({ type: 'search', query }); },
+    select(id, ready = true) { receive({ type: 'select', id }); if (ready) detailReceive?.({ type: 'ready' }); },
+    ready() { detailReceive({ type: 'ready' }); },
+    search(query) { receive({ type: 'search', query }); },
     get html() { return panel.webview.html; }, get state() { return sent.at(-1); }, reveals,
+    get htmlWrites() { return htmlWrites; },
   };
 }
 
@@ -67,6 +78,49 @@ test('selected details update on manual and automatic refresh without revealing 
   assert.match(app.html, /Camera/); assert.match(app.html, /COM8/); assert.doesNotMatch(app.html, /Radio|COM4/);
   await app.refresh(topology('Scanner'), true);
   assert.match(app.html, /Scanner/); assert.equal(app.reveals.length, 1);
+});
+
+test('partial controller and hub failures retain stale selected details instead of inventing disconnection', async t => {
+  const app = host(t);
+  await app.refresh(topology()); app.select('0.0');
+  const failed = topology();
+  failed.partialFailures = 1;
+  failed.controllers[0].ports = [];
+  failed.controllers[0].error = 'controllerQueryTimedOut';
+  await app.refresh(failed, true);
+  assert.match(app.html, />STALE</); assert.match(app.html, /Radio/);
+  assert.doesNotMatch(app.html, />DISCONNECTED</); assert.match(app.html, /controllerQueryTimedOut/);
+  const portFailure = topology();
+  portFailure.controllers[0].ports[0].hubError = 'hub query unavailable';
+  await app.refresh(portFailure, true);
+  assert.match(app.html, />STALE</); assert.doesNotMatch(app.html, />CONNECTED</);
+  await app.refresh(topology('Camera'), true);
+  assert.match(app.html, />CONNECTED</); assert.doesNotMatch(app.html, />STALE</);
+});
+
+test('unchanged and changed automatic scans do not navigate the detail document again', async t => {
+  const app = host(t);
+  await app.refresh(topology()); app.select('0.0');
+  const writes = app.htmlWrites;
+  await app.refresh(topology(), true);
+  assert.equal(app.htmlWrites, writes);
+  await app.refresh(topology('Camera'), true);
+  assert.equal(app.htmlWrites, writes);
+  assert.match(app.html, /Camera/);
+});
+
+test('detail runtime receives only the latest queued update after its ready handshake', async t => {
+  const app = host(t);
+  await app.refresh(topology()); app.select('0.0', false);
+  assert.match(app.html, /script-src 'nonce-[0-9a-f]{48}'/);
+  assert.match(app.html, /src="fixture\/resources\/detail.js"/);
+  assert.doesNotMatch(app.html, /script-src 'unsafe-inline'|unsafe-eval/);
+  await app.refresh(topology('Camera'), true);
+  await app.refresh(topology('Scanner'), true);
+  assert.match(app.html, /Radio/);
+  app.ready();
+  assert.match(app.html, /Scanner/); assert.doesNotMatch(app.html, /Radio|Camera/);
+  assert.equal(app.htmlWrites, 1);
 });
 
 test('disconnect and reconnect replace device identity and missing ports do not retain live data', async t => {
