@@ -1,11 +1,12 @@
 # Changelog
 
-## Unreleased — Selected detail synchronization
+## 2026-11-07 — 0.14.0 — UI — Linked detail styling and synchronization
 
+- Unified compact detail styling with the topology sidebar while preserving theme support and all four detail categories.
 - Refresh open details from the latest topology while retaining the selected physical location, including through controller reordering and search filters.
 - Clear live device identity after disconnection and show explicit stale warnings after query failures. Automatic updates do not reveal the detail panel or take focus.
 - Treat partial controller and hub failures as unknown/stale, and preserve detail category, focus, and scroll when fresh data arrives.
-- Verified with synthetic extension-host fixtures; actual VS Code and hardware acceptance remain pending.
+- Automated tests cover synthetic extension-host and detail-runtime fixtures. The user confirmed the installed VS Code interface passed actual acceptance on 2026-11-07.
 
 ## 2026-10-21 — 0.13.0 — UI — Dark USB workbench
 
