@@ -34,6 +34,24 @@ test('renders node labels and device details as escaped, script-free HTML', () =
   assert.doesNotMatch(html, /<script\b/i);
 });
 
+test('uses compact shared-theme surfaces and wrapping detail categories', () => {
+  const html = renderDetailHtml({ label: 'Port 5: Radio', port: 5,
+    detailSections: [{ title: 'Physical Port', text: 'Status: connected\nPort: 5' }] });
+  const css = html.match(/<style>([\s\S]*?)<\/style>/)[1];
+  assert.match(css, /body \{ font-size: 13px; line-height: 1\.55; \}/);
+  assert.match(css, /\.device-hero \{[^}]*background: color-mix\(in srgb, var\(--accent\) 4%, var\(--base\)\)/);
+  assert.match(css, /\.device-section \{[^}]*background: color-mix\(in srgb, var\(--accent\) 4%, var\(--base\)\)/);
+  assert.match(css, /\.detail-tabs \{[^}]*flex-wrap: wrap/);
+  assert.doesNotMatch(css, /overflow-x: auto/);
+  assert.match(css, /\.hero-facts \{[^}]*border-top: 1px solid var\(--line\)/);
+  assert.match(css, /\.fact \{[^}]*background: transparent; border: 0/);
+  assert.match(css, /h1 \{[^}]*font-size: clamp\(20px, 2vw, 23px\)/);
+  assert.match(css, /\.field \{[^}]*minmax\(0, 1fr\)/);
+  assert.match(html, /input type="radio" id="tab-port" name="detail-category" checked/);
+  assert.match(html, /input:focus-visible \+ label/);
+  assert.doesNotMatch(html, /<script\b/i);
+});
+
 test('shows an explicit message when a node has no detail text', () => {
   const html = renderDetailHtml({ label: 'Example device', detailText: '' });
 
