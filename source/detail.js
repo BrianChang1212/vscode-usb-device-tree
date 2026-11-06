@@ -145,9 +145,9 @@ function renderTabSections(sections, kind, t) {
 
 function deviceSummary(node, t) {
   const label = escapeHtml(node.label || t('USB Device'));
-  const statusCode = String(node.status || 'unknown');
+  const statusCode = node.staleReason ? 'stale' : String(node.status || 'unknown');
   const statusText = statusCode === 'connected' ? t('CONNECTED') : statusCode === 'disconnected'
-    ? t('DISCONNECTED') : statusCode.toUpperCase();
+    ? t('DISCONNECTED') : statusCode === 'stale' ? t('STALE') : statusCode.toUpperCase();
   const vid = Number.isInteger(node.vendorId) ? node.vendorId.toString(16).padStart(4, '0') : '----';
   const pid = Number.isInteger(node.productId) ? node.productId.toString(16).padStart(4, '0') : '----';
   const port = Number.isInteger(node.port) ? t('PORT {0}', String(node.port).padStart(2, '0')) : t('USB DEVICE');
@@ -220,7 +220,7 @@ function renderDetailHtml(node, t = englishT, language = 'en') {
   <style>${guideCss('editor')}${DETAIL_CSS}</style>
 </head>
 <body>
-  <main>${deviceSummary(node, t)}${body}</main>
+  <main>${deviceSummary(node, t)}${node.staleReason ? `<p class="empty" role="status">${escapeHtml(node.staleReason)}</p>` : ''}${body}</main>
 </body>
 </html>`;
 }
@@ -248,9 +248,14 @@ class DetailsPanel {
       this.subscriptions.push(this.panel);
     }
 
-    this.panel.title = node.label || t('USB Device Details');
-    this.panel.webview.html = renderDetailHtml(node, t, this.vscode.env?.language);
+    this.update(node);
     this.panel.reveal(this.vscode.ViewColumn.Beside, true);
+  }
+
+  update(node) {
+    if (!this.panel) return;
+    this.panel.title = node.label || this.t('USB Device Details');
+    this.panel.webview.html = renderDetailHtml(node, this.t, this.vscode.env?.language);
   }
 }
 

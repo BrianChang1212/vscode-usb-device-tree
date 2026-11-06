@@ -158,6 +158,10 @@
     }
     if (data.type !== 'state') return;
     state = data;
+    if (typeof state.selectedId === 'string') {
+      selectedId = state.selectedId;
+      saveState();
+    }
     if (!initialized && state.nodes.length) {
       for (const node of state.nodes) {
         expanded.add(node.id);

@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased — Selected detail synchronization
+
+- Refresh open details from the latest topology while retaining the selected physical location, including through controller reordering and search filters.
+- Clear live device identity after disconnection and show explicit stale warnings after query failures. Automatic updates do not reveal the detail panel or take focus.
+- Verified with synthetic extension-host fixtures; actual VS Code and hardware acceptance remain pending.
+
 ## 2026-10-21 — 0.13.0 — UI — Dark USB workbench
 
 - Redesigned the USB topology sidebar as a compact dark workbench with controller, hub, and port rows, search, and expand/collapse controls.

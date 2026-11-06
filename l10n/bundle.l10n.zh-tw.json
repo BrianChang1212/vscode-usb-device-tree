@@ -1,4 +1,6 @@
 {
+  "Selected USB location is disconnected.": "所選的 USB 位置已斷線。",
+  "STALE": "資料過期",
   "Connection Status": "連線狀態",
   "Physical Port": "實體連接埠",
   "Connection Status Code": "連線狀態代碼",

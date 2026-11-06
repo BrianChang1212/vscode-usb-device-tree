@@ -38,6 +38,8 @@ The bundled native helper queries the topology through Windows USB device interf
 
 After a failed refresh, the view marks the retained data as stale. XML export is unavailable until a query has succeeded.
 
+An open detail panel follows the selected physical location through manual and automatic refreshes without taking focus. Disconnecting a device clears its live identity; reconnecting or replacing it updates the details. If the location disappears, the panel shows a disconnected message. Query failures retain the last successful details with an explicit stale warning instead of reporting a disconnection.
+
 ## Development, testing, and VSIX packaging
 
 Requirements: Node.js 24, npm, Visual Studio 2022 C++ x64 Build Tools, and the Windows SDK.

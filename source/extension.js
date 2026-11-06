@@ -55,7 +55,7 @@ class UsbDeviceTreeProvider {
         visit(node.children);
       }
     };
-    visit(this.nodes);
+    visit(this.allNodes);
   }
 
   markStale(reason) {
@@ -100,6 +100,40 @@ function activate(context) {
   const pauseState = createAutoRefreshPauseState();
   let lastSuccessfulSnapshot;
   let refreshing = false;
+  let selectedRoute;
+  let selectedPort;
+
+  function nodeKey(node) {
+    if (node.type === 'port') return `port:${node.port}`;
+    return `${node.type}:${node.instanceId || node.pnpProperties?.instanceId
+      || node.symbolicLink || node.driverKeyName || node.name || node.portName || node.label}`;
+  }
+
+  function rememberSelection(node) {
+    treeView.selectedId = node.id;
+    selectedPort = node.port;
+    selectedRoute = [];
+    for (let item = node; item; item = provider.nodesById.get(item.parentId)) {
+      selectedRoute.unshift(nodeKey(item));
+    }
+  }
+
+  function refreshDetails() {
+    if (!selectedRoute) return;
+    let nodes = provider.allNodes;
+    let selected;
+    for (const key of selectedRoute) {
+      const matches = nodes.filter(node => nodeKey(node) === key);
+      selected = matches.length === 1 ? matches[0] : undefined;
+      if (!selected) break;
+      nodes = selected.children;
+    }
+    treeView.selectedId = selected?.id || '';
+    if (selected) detailsPanel.update({ ...selected, staleReason: provider.staleReason });
+    else detailsPanel.update({ status: 'disconnected', port: selectedPort, staleReason: provider.staleReason,
+      label: t('Selected USB location is disconnected.'),
+      detailText: 'Status: disconnected' });
+  }
 
   context.subscriptions.push({ dispose: () => autoRefresh.stop() }, watcher,
     { dispose: () => highlights.dispose() },
@@ -114,7 +148,10 @@ function activate(context) {
     syncAutoRefresh();
   }, undefined, context.subscriptions);
   treeView.onDidChangeSelection(({ selection }) => {
-    if (selection[0]) detailsPanel.show(selection[0]);
+    if (selection[0]) {
+      rememberSelection(selection[0]);
+      detailsPanel.show({ ...selection[0], staleReason: provider.staleReason });
+    }
   }, undefined, context.subscriptions);
 
   context.subscriptions.push(
@@ -130,10 +167,12 @@ function activate(context) {
           const topology = await queryUsbTopology(context.extensionPath);
           const snapshot = createSnapshot(topology);
           provider.setTopology(topology);
+          refreshDetails();
           lastSuccessfulSnapshot = snapshot;
           updateMessage();
         } catch (error) {
           provider.markStale(friendlyError(error, t));
+          refreshDetails();
           updateMessage();
           if (!automatic) await vscode.window.showErrorMessage(friendlyError(error, t));
         }

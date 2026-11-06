@@ -99,6 +99,7 @@ class UsbTreeWebview {
       query: this.provider.searchQuery, message: this.message || '',
       paused: this.paused || false, running: this.running || false,
       hasData: this.provider.allNodes.length > 0,
+      ...(this.selectedId !== undefined ? { selectedId: this.selectedId } : {}),
     });
   }
 
