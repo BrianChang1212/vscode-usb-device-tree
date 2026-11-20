@@ -58,15 +58,15 @@ body { font-size: 12px; line-height: 1.45; }
 button, input { font: inherit; }
 .node-row:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
 .tree-shell { min-height: 100vh; }
-.tree-header { padding: 21px 16px 12px; border-bottom: 1px solid var(--line); }
+.tree-header { position: sticky; top: 0; z-index: 5; padding: 14px 16px 10px; background: color-mix(in srgb, var(--base) 72%, transparent); -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px); border-bottom: 1px solid var(--line); }
 .title-line { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 7px; }
 h1 { font-size: 17px; line-height: 1.1; }
 .live-state { color: var(--muted); font: 700 10px var(--mono); letter-spacing: .08em; white-space: nowrap; }
-.live-state.running { color: var(--accent); }
+.live-state.running { padding: 0 9px; border-radius: 980px; background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--accent); }
 .live-state.running::before { content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: currentColor; margin-right: 6px; box-shadow: var(--glow); }
 .tree-tools { padding: 14px 12px 8px; }
 .search-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-.tree-search { width: 100%; height: 32px; background: var(--surface); border: 1px solid var(--line); color: var(--text); padding: 0 10px; border-radius: 4px; }
+.tree-search { width: 100%; height: 30px; background: color-mix(in srgb, var(--accent) 10%, transparent); border: 0; color: var(--text); padding: 0 12px; border-radius: 10px; }
 .tree-search::placeholder { color: var(--muted); }
 .tree-search:focus-visible { outline: 2px solid var(--focus); outline-offset: -1px; }
 .tree-actions { display: flex; flex-wrap: wrap; gap: 4px; padding: 0 12px 10px; }
@@ -76,12 +76,12 @@ h1 { font-size: 17px; line-height: 1.1; }
 .tree-status:empty { display: none; }
 .tree-list { padding: 4px 0 30px; }
 .tree-group { margin: 0; }
-.node-row { display: flex; align-items: center; min-height: 29px; gap: 4px; padding: 3px 10px 3px calc(8px + var(--depth) * 13px); cursor: pointer; position: relative; border-left: 2px solid transparent; }
+.node-row { display: flex; align-items: center; min-height: 29px; gap: 4px; padding: 3px 10px 3px calc(8px + var(--depth) * 13px); cursor: pointer; position: relative; border-left: 2px solid transparent; border-radius: 8px; margin: 0 6px; }
 .node-row:hover { background: var(--raised); }
 .node-row.selected { background: color-mix(in srgb, var(--accent) 16%, transparent); border-left-color: var(--accent); }
-.node-row.controller { margin-top: 8px; min-height: 37px; background: var(--surface); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); font-weight: 700; }
+.node-row.controller { margin: 8px 6px 0; min-height: 37px; background: color-mix(in srgb, var(--accent) 5%, var(--surface)); border: 0; border-radius: 10px; font-weight: 700; }
 .node-row.controller.selected { background: color-mix(in srgb, var(--accent) 16%, var(--surface)); }
-.node-row.controller::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--accent); }
+.node-row.controller::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; border-radius: 10px 0 0 10px; background: var(--accent); }
 .node-row.hub { color: var(--text); font-weight: 650; }
 .node-row.port:not(.connected) { color: var(--muted); }
 .disclosure { width: 16px; min-width: 16px; min-height: 0; border: 0; background: none; color: var(--muted); padding: 0; cursor: pointer; font-size: 12px; }
@@ -95,5 +95,29 @@ h1 { font-size: 17px; line-height: 1.1; }
 .node-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .node-meta { color: var(--muted); font: 10px/1.4 var(--mono); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .node-row.controller .node-meta { color: var(--accent); }
-.empty-state { margin: 12px; padding: 16px 10px; border: 1px dashed var(--line); border-radius: 6px; color: var(--muted); line-height: 1.6; }
+.empty-state { margin: 12px; padding: 16px 10px; border: 1px dashed var(--line); border-radius: 12px; color: var(--muted); line-height: 1.6; }
 @media (max-width: 230px) { .tree-header { padding-left: 12px; } .tree-actions button { padding: 4px 6px; } .node-row { padding-right: 5px; } }
+body.vscode-high-contrast .disclosure, body.vscode-high-contrast-light .disclosure { border: 0; background: none; }
+
+/* Task Reports sidebar family. Distributed at build time; no runtime dependency. */
+/* Rounded borderless cards, pill buttons, fill inputs. References guide variables only. */
+body { font-size: 13px; line-height: 1.5; }
+h1 { font-size: 18px; letter-spacing: .035em; }
+h2 { font-family: var(--mono); }
+.card, .metric { background: var(--surface); border: 0; border-radius: 12px; box-shadow: none; }
+.card::before { display: none; }
+.metric strong { text-shadow: none; }
+button { min-height: 28px; padding: 4px 12px; border: 0; border-radius: 980px; font-size: 12.5px; font-weight: 500;
+  background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent); transition: filter .15s; }
+button:hover:not(:disabled) { filter: brightness(1.15); color: var(--accent); }
+button.primary { background: var(--accent); color: var(--accent-fg); font-weight: 600; }
+button.primary:hover:not(:disabled) { color: var(--accent-fg); }
+button.danger { background: color-mix(in srgb, var(--danger) 12%, transparent); color: var(--danger); }
+button.danger:hover:not(:disabled) { color: var(--danger); }
+input, select, textarea { border: 0; border-radius: 10px; background: color-mix(in srgb, var(--accent) 10%, transparent); color: var(--text); font: inherit; }
+input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--focus); outline-offset: 0; }
+body.vscode-high-contrast button, body.vscode-high-contrast-light button { border: 1px solid var(--accent); background: transparent; color: var(--text); }
+body.vscode-high-contrast input, body.vscode-high-contrast select, body.vscode-high-contrast textarea,
+body.vscode-high-contrast-light input, body.vscode-high-contrast-light select, body.vscode-high-contrast-light textarea { border: 1px solid var(--line); background: transparent; }
+body.vscode-high-contrast .card, body.vscode-high-contrast .metric,
+body.vscode-high-contrast-light .card, body.vscode-high-contrast-light .metric { border: 1px solid var(--line); }
