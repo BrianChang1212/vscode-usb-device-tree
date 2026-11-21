@@ -66,7 +66,7 @@ body { padding: 0; font-size: 12px; line-height: 1.45; }
 button, input { font: inherit; }
 .node-row:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
 .tree-shell { min-height: 100vh; }
-.tree-header { position: sticky; top: 0; z-index: 5; padding: 16px 16px 22px; background: color-mix(in srgb, var(--base) 72%, transparent); -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px); }
+.tree-header { position: sticky; top: 0; z-index: 5; padding: 14px 16px 10px; background: color-mix(in srgb, var(--base) 72%, transparent); -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px); border-bottom: 1px solid var(--line); }
 .title-line { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 7px; }
 h1 { font-size: 20px; line-height: 1.15; }
 .live-state { color: var(--muted); font: 700 10px var(--mono); letter-spacing: .08em; white-space: nowrap; }
