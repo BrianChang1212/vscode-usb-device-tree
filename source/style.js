@@ -27,13 +27,21 @@ function guideCss(surface) {
           linear-gradient(90deg, #75e73e08 1px, transparent 1px);
   --font: var(--vscode-font-family, 'Segoe UI', sans-serif);
   --mono: var(--vscode-editor-font-family, Consolas, monospace);
+  --in-progress: #54cddd;
 }
-body.vscode-light { --accent: #3a7d0a; --accent-fg: #ffffff; --glow: none; --grid: none; }
+body:not(.vscode-light):not(.vscode-high-contrast):not(.vscode-high-contrast-light) {
+  --base: #080f0a;
+  --surface: #101c12;
+  --raised: #1c301b;
+  --line: #2c4c30;
+}
+body.vscode-light { --accent: #3a7d0a; --accent-fg: #ffffff; --glow: none; --grid: none; --in-progress: #087683; }
 body.vscode-high-contrast, body.vscode-high-contrast-light {
   --accent: var(--vscode-contrastActiveBorder, var(--vscode-focusBorder));
   --accent-fg: var(--vscode-editor-background);
   --focus: var(--vscode-focusBorder);
   --glow: none; --grid: none;
+  --in-progress: var(--vscode-textLink-foreground, var(--accent));
 }
 /* components */
 * { box-sizing: border-box; }
