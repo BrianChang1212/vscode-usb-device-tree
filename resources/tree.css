@@ -122,6 +122,8 @@ button.primary { background: var(--accent); color: var(--accent-fg); font-weight
 button.primary:hover:not(:disabled) { color: var(--accent-fg); }
 button.danger { background: color-mix(in srgb, var(--danger) 12%, transparent); color: var(--danger); }
 button.danger:hover:not(:disabled) { color: var(--danger); }
+/* A disabled danger button uses the neutral disabled look, not a dimmed warning colour. */
+button.danger:disabled { background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent); }
 input, select, textarea { border: 0; border-radius: 10px; background: color-mix(in srgb, var(--accent) 10%, transparent); color: var(--text); font: inherit; }
 input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--focus); outline-offset: 0; }
 body.vscode-high-contrast button, body.vscode-high-contrast-light button { border: 1px solid var(--accent); background: transparent; color: var(--text); }
