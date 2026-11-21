@@ -54,34 +54,34 @@ button.danger { background: transparent; border-color: var(--danger); color: var
 .empty { padding: 16px 10px; border: 1px dashed var(--line); border-radius: 6px; color: var(--muted); }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 /* tree: the guide block above is generated from source/style.js guideCss('sideBar'); keep it identical. */
-body { font-size: 12px; line-height: 1.45; }
+body { padding: 0; font-size: 12px; line-height: 1.45; }
 button, input { font: inherit; }
 .node-row:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
 .tree-shell { min-height: 100vh; }
-.tree-header { padding: 21px 16px 12px; border-bottom: 1px solid var(--line); }
+.tree-header { padding: 16px 16px 22px; }
 .title-line { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 7px; }
-h1 { font-size: 17px; line-height: 1.1; }
+h1 { font-size: 20px; line-height: 1.15; }
 .live-state { color: var(--muted); font: 700 10px var(--mono); letter-spacing: .08em; white-space: nowrap; }
 .live-state.running { color: var(--accent); }
 .live-state.running::before { content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: currentColor; margin-right: 6px; box-shadow: var(--glow); }
-.tree-tools { padding: 14px 12px 8px; }
+.tree-tools { padding: 0 16px 8px; }
 .search-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 .tree-search { width: 100%; height: 32px; background: var(--surface); border: 1px solid var(--line); color: var(--text); padding: 0 10px; border-radius: 4px; }
 .tree-search::placeholder { color: var(--muted); }
 .tree-search:focus-visible { outline: 2px solid var(--focus); outline-offset: -1px; }
-.tree-actions { display: flex; flex-wrap: wrap; gap: 4px; padding: 0 12px 10px; }
+.tree-actions { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 16px 10px; }
 .tree-actions button { min-height: 26px; padding: 4px 8px; white-space: nowrap; }
 .tree-actions button:hover { color: var(--accent); }
 .tree-status { min-height: 20px; margin: 0 12px 8px; padding: 2px 0 2px 8px; border-left: 2px solid var(--accent); color: var(--muted); font-size: 11px; overflow-wrap: anywhere; }
 .tree-status:empty { display: none; }
-.tree-list { padding: 4px 0 30px; }
+.tree-list { padding: 4px 16px 30px; }
 .tree-group { margin: 0; }
 .node-row { display: flex; align-items: center; min-height: 29px; gap: 4px; padding: 3px 10px 3px calc(8px + var(--depth) * 13px); cursor: pointer; position: relative; border-left: 2px solid transparent; }
 .node-row:hover { background: var(--raised); }
 .node-row.selected { background: color-mix(in srgb, var(--accent) 16%, transparent); border-left-color: var(--accent); }
-.node-row.controller { margin-top: 8px; min-height: 37px; background: var(--surface); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); font-weight: 700; }
+.node-row.controller { margin-top: 12px; min-height: 37px; background: transparent; border: 1px solid var(--line); border-radius: 4px; font-weight: 700; }
 .node-row.controller.selected { background: color-mix(in srgb, var(--accent) 16%, var(--surface)); }
-.node-row.controller::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--accent); }
+.node-row.controller::before { display: none; }
 .node-row.hub { color: var(--text); font-weight: 650; }
 .node-row.port:not(.connected) { color: var(--muted); }
 .disclosure { width: 16px; min-width: 16px; min-height: 0; border: 0; background: none; color: var(--muted); padding: 0; cursor: pointer; font-size: 12px; }
@@ -97,3 +97,14 @@ h1 { font-size: 17px; line-height: 1.1; }
 .node-row.controller .node-meta { color: var(--accent); }
 .empty-state { margin: 12px; padding: 16px 10px; border: 1px dashed var(--line); border-radius: 6px; color: var(--muted); line-height: 1.6; }
 @media (max-width: 230px) { .tree-header { padding-left: 12px; } .tree-actions button { padding: 4px 6px; } .node-row { padding-right: 5px; } }
+
+/* Task Reports sidebar family. Distributed at build time; no runtime dependency. */
+body { font-size: 13px; line-height: 1.55; }
+h1 { font-size: 20px; letter-spacing: -.035em; }
+h2 { font-family: var(--mono); }
+button { min-height: 30px; font-size: 12px; }
+.card, .metric { background: transparent; border-radius: 4px; }
+.card::before { display: none; }
+.metric strong { text-shadow: none; }
+button.primary:hover:not(:disabled) { color: var(--accent-fg); }
+

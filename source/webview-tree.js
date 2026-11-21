@@ -37,7 +37,7 @@ function renderTreeHtml(styleUri, scriptUri, cspSource, t = englishT, language =
 <body><div class="tree-shell">
   <header class="tree-header"><div class="eyebrow">${escapeHtml(t('HARDWARE / USB'))}</div><div class="title-line"><h1>${escapeHtml(t('USB TOPOLOGY'))}</h1><span id="live-state" class="live-state">${escapeHtml(t('IDLE'))}</span></div></header>
   <div class="tree-tools"><label class="search-label" for="tree-search">${escapeHtml(t('Search devices and ports'))}</label><input id="tree-search" class="tree-search" type="search" autocomplete="off" placeholder="${escapeHtml(t('Search · device, VID/PID, COM'))}"></div>
-  <div class="tree-actions"><button type="button" data-action="expand">${escapeHtml(t('Expand all'))}</button><button type="button" data-action="collapse">${escapeHtml(t('Collapse'))}</button><button type="button" data-action="refresh">${escapeHtml(t('Refresh'))}</button><button type="button" data-action="pause" id="pause-action">${escapeHtml(t('Pause'))}</button><button type="button" data-action="export">XML</button></div>
+  <div class="tree-actions"><button type="button" data-action="expand">${escapeHtml(t('Expand all'))}</button><button type="button" data-action="collapse">${escapeHtml(t('Collapse'))}</button><button type="button" class="primary" data-action="refresh">${escapeHtml(t('Refresh'))}</button><button type="button" data-action="pause" id="pause-action">${escapeHtml(t('Pause'))}</button><button type="button" data-action="export">XML</button></div>
   <div id="tree-status" class="tree-status" role="status"></div>
   <div id="tree-list" class="tree-list" role="tree" aria-label="${escapeHtml(t('USB device topology'))}"></div>
 </div><script src="${escapeHtml(scriptUri)}"></script></body></html>`;
